@@ -15,6 +15,7 @@ applyTo: "**/*.csproj"
 ## Repo Structure
 
 * `gcdump-analyze.sln`: main Visual Studio solution file
+* `data`: test data, example `.gcdump` files
 * `DotNet.GCDump.Analyze` is the default namespace
 * Shared settings should all go in `Directory.Build.props`
 * `src\gcdump-analyze-core\`: class library containing shared C# code
