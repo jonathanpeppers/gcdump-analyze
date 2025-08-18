@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using gcdump_analyze_mcp;
 
 var builder = Host.CreateEmptyApplicationBuilder(settings: null);
 builder.Services

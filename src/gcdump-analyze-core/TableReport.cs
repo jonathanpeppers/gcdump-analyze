@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace DotNet.GCDump.Analyze;
 
 /// <summary>
@@ -16,6 +18,14 @@ public sealed class TableReport
     {
         Columns = columns ?? throw new ArgumentNullException(nameof(columns));
         Rows = rows ?? throw new ArgumentNullException(nameof(rows));
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        using var sw = new StringWriter(sb);
+        Markdown.Write(this, sw);
+        return sb.ToString();
     }
 }
 

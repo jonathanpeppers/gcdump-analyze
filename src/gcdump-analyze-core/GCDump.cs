@@ -53,7 +53,28 @@ public sealed class GCDump : IDisposable
             "Inclusive Size (Bytes)"
         };
 
-        var list = BuildTypeAggregates(headers, maxRows: rows);
+        var list = BuildTypeAggregates(headers, maxRows: rows, sortByInclusive: true);
+
+        return new TableReport(headers, list);
+    }
+
+    /// <summary>
+    /// Generate a report of object types ordered by shallow size (Size (Bytes)).
+    /// </summary>
+    public TableReport GetReportBySize(int rows)
+    {
+        if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
+        EnsureLoaded();
+
+        var headers = new[]
+        {
+            "Object Type",
+            "Count",
+            "Size (Bytes)",
+            "Inclusive Size (Bytes)"
+        };
+
+        var list = BuildTypeAggregates(headers, maxRows: rows, sortByInclusive: false);
 
         return new TableReport(headers, list);
     }
@@ -81,7 +102,7 @@ public sealed class GCDump : IDisposable
         }
     }
 
-    private List<TableRow> BuildTypeAggregates(IReadOnlyList<string> headers, int maxRows)
+    private List<TableRow> BuildTypeAggregates(IReadOnlyList<string> headers, int maxRows, bool sortByInclusive)
     {
         var graph = _graph ?? throw new InvalidOperationException("Graph not loaded.");
 
@@ -149,14 +170,20 @@ public sealed class GCDump : IDisposable
             [headers[1]] = kvp.Value.Count,
             [headers[2]] = kvp.Value.Size,
             [headers[3]] = kvp.Value.Inclusive,
-        }))
-        .OrderByDescending(r => Convert.ToInt64(r[headers[3]]))
-        .ThenByDescending(r => Convert.ToInt64(r[headers[2]]))
-        .ThenBy(r => (string)r[headers[0]]!)
-        .Take(maxRows)
-        .ToList();
+        }));
 
-        return rows;
+        rows = sortByInclusive
+            ? rows.OrderByDescending(r => Convert.ToInt64(r[headers[3]]))
+                   .ThenByDescending(r => Convert.ToInt64(r[headers[2]]))
+                   .ThenBy(r => (string)r[headers[0]]!)
+            : rows.OrderByDescending(r => Convert.ToInt64(r[headers[2]]))
+                   .ThenByDescending(r => Convert.ToInt64(r[headers[3]]))
+                   .ThenBy(r => (string)r[headers[0]]!);
+
+        var top = rows
+            .Take(maxRows)
+            .ToList();
+        return top;
     }
 
     private static int[] BuildPostOrderIndex(MemoryGraph graph)
