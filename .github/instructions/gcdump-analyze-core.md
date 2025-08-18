@@ -31,7 +31,6 @@ public sealed class TableReport
 {
   public IReadOnlyList<string> Columns { get; }
   public IReadOnlyList<TableRow> Rows { get; }
-  public string? Source { get; }
 }
 
 public sealed class TableRow : IReadOnlyDictionary<string, object?>
