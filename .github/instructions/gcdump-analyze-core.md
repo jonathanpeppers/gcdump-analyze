@@ -3,9 +3,12 @@
 * Uses `Microsoft.Diagnostics.Monitoring.EventPipe` from the `dotnet-tools` feed:
   * https://dev.azure.com/dnceng/public/_artifacts/feed/dotnet-tools/NuGet/Microsoft.Diagnostics.Monitoring.EventPipe/overview/9.0.637302
 
-* `GCDump` type represents a `*.gcdump` file. Has expected APIs for opening the file with a `string path` and `System.IO.Stream`.
+* `GCDump` type represents a `*.gcdump` file. APIs for opening the file with a `string path` or `Stream`.
 
-* `GetReportByInclusiveSize(int rows)` returns a `TableReport` that represents data such as:
+* `GetReportByInclusiveSize(int rows)` returns a `TableReport` sorted by Inclusive Size (retained) with columns:
+  * Object Type, Count, Size (Bytes), Inclusive Size (Bytes)
+
+* `GetReportBySize(int rows)` returns a `TableReport` sorted by shallow Size (Bytes) with the same columns.
 
 | Object Type                                                                                                          |  Count |   Size (Bytes) | Inclusive Size (Bytes) |
 |----------------------------------------------------------------------------------------------------------------------|-------:|---------------:|-----------------------:|
@@ -20,9 +23,15 @@
 
 Where this is an example if passed 8 rows.
 
-* `Markdown` is a static class for rendering markdown
+* `Markdown` is a static class for rendering markdown tables from a `TableReport`.
 
 * `Markdown.Write(TableReport, System.IO.TextWriter)` writes the report to the passed in `TextWriter`.
+
+## Implementation notes
+
+* Parsing: uses `Microsoft.Diagnostics.Tracing` (`GCHeapDump`) to load the dump into a `MemoryGraph`.
+* Retained size: computed via `SpanningTree` dominators; attribution avoids double-counting within same-type chains.
+* Output: `TableReport` is stable and used by CLI, tests, and MCP server tools.
 
 ## Types
 
