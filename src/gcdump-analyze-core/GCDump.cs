@@ -142,7 +142,22 @@ public sealed class GCDump : IDisposable
             if (!byType.TryGetValue(name, out var agg)) agg = default;
             agg.Count += 1;
             agg.Size += node.Size;
-            agg.Inclusive += unchecked((long)retained[(int)i]);
+
+            // Attribute retained size only when the immediate dominator is a different type,
+            // avoiding double-counting long chains of same-type instances.
+            long inc = unchecked((long)retained[(int)i]);
+            var parentIndex = spanningTree.Parent(i);
+            if (parentIndex != NodeIndex.Invalid)
+            {
+                var pNode = graph.GetNode(parentIndex, nodeStorage);
+                var pType = graph.GetType(pNode.TypeIndex, typeStorage);
+                if (pType.Name == name)
+                {
+                    inc = 0; // skip attribution to avoid within-type double counting
+                }
+            }
+
+            agg.Inclusive += inc;
             byType[name] = agg;
         }
 

@@ -8,5 +8,5 @@ System.Reflection.RuntimeMethodInfo | 3409 | 354536 | 662698
 System.Reflection.RuntimePropertyInfo | 800 | 83200 | 576762
 System.String | 6913 | 518562 | 518562
 MemberInfoCache<System.Reflection.RuntimeMethodInfo> | 83 | 4648 | 438171
-Node<System.Reflection.MemberInfo,System.ComponentModel.TypeConverter> | 61 | 2928 | 417332
 System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MemberInfo,System.ComponentModel.TypeConverter> | 1 | 32 | 384470
+[static var System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MemberInfo,System.ComponentModel.TypeConverter>.s_converterCache] | 1 | 0 | 384470
