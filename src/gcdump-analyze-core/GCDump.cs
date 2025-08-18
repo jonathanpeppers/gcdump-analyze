@@ -39,7 +39,7 @@ public sealed class GCDump : IDisposable
     /// </summary>
     public static GCDump Open(Stream stream)
     {
-        if (stream is null) throw new ArgumentNullException(nameof(stream));
+        ArgumentNullException.ThrowIfNull(stream);
         return Open(stream, path: null);
     }
 
