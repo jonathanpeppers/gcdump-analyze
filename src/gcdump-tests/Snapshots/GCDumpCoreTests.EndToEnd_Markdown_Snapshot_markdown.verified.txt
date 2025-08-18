@@ -1,0 +1,12 @@
+﻿Report for test1.gcdump
+
+Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
+---|---|---|---
+System.String | 35967 | 148572 | 567558
+System.Byte[] | 2782 | 45174 | 564114
+System.Object | 12523 | 154817 | 560824
+System.Collections.Generic.List`1 | 23160 | 108981 | 558048
+System.Collections.Generic.Dictionary`2 | 322 | 5117 | 554580
+System.Delegate[] | 44580 | 196841 | 550614
+System.Int32[] | 14088 | 101462 | 547279
+Type7 | 32988 | 31931 | 544320
