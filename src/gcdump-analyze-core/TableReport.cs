@@ -12,14 +12,10 @@ public sealed class TableReport
     /// <summary>Ordered list of rows in the table.</summary>
     public IReadOnlyList<TableRow> Rows { get; }
 
-    /// <summary>Optional display name of the data source (e.g., filename).</summary>
-    public string? Source { get; }
-
-    public TableReport(IReadOnlyList<string> columns, IReadOnlyList<TableRow> rows, string? source = null)
+    public TableReport(IReadOnlyList<string> columns, IReadOnlyList<TableRow> rows)
     {
         Columns = columns ?? throw new ArgumentNullException(nameof(columns));
         Rows = rows ?? throw new ArgumentNullException(nameof(rows));
-        Source = source;
     }
 }
 

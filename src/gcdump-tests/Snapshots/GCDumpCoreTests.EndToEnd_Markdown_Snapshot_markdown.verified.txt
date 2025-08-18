@@ -1,6 +1,4 @@
-﻿Report for test1.gcdump
-
-Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
+﻿Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
 ---|---|---|---
 [static vars] | 1 | 0 | 2350790
 RuntimeTypeCache | 108 | 17280 | 667785

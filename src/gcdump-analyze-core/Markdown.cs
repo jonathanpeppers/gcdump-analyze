@@ -9,14 +9,8 @@ public static class Markdown
     /// </summary>
     public static void Write(TableReport report, TextWriter writer)
     {
-        if (report is null) throw new ArgumentNullException(nameof(report));
-        if (writer is null) throw new ArgumentNullException(nameof(writer));
-
-        if (!string.IsNullOrEmpty(report.Source))
-        {
-            writer.WriteLine($"Report for {report.Source}");
-            writer.WriteLine();
-        }
+        ArgumentNullException.ThrowIfNull(report);
+        ArgumentNullException.ThrowIfNull(writer);
 
         // Header
         writer.WriteLine(string.Join(" | ", report.Columns));

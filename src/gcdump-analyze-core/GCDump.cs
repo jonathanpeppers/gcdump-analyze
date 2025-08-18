@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using Graphs;
 using Microsoft.Diagnostics.Tracing;
 
@@ -13,25 +11,19 @@ namespace DotNet.GCDump.Analyze;
 /// </summary>
 public sealed class GCDump : IDisposable
 {
-    private readonly MemoryStream _data;
-    private readonly string? _path;
+    private readonly Stream _data;
     private MemoryGraph? _graph;
 
-    private GCDump(MemoryStream data, string? path)
-    {
-        _data = data;
-        _path = path;
-    }
+    private GCDump(Stream data) => _data = data;
 
     /// <summary>
     /// Opens a GCDump from a file path.
     /// </summary>
     public static GCDump Open(string path)
     {
-        if (string.IsNullOrWhiteSpace(path))
-            throw new ArgumentException("Path must be a non-empty string.", nameof(path));
-        using var fs = File.OpenRead(path);
-        return Open(fs, path);
+        return string.IsNullOrWhiteSpace(path)
+            ? throw new ArgumentException("Path must be a non-empty string.", nameof(path))
+            : new GCDump(File.OpenRead(path));
     }
 
     /// <summary>
@@ -40,15 +32,7 @@ public sealed class GCDump : IDisposable
     public static GCDump Open(Stream stream)
     {
         ArgumentNullException.ThrowIfNull(stream);
-        return Open(stream, path: null);
-    }
-
-    private static GCDump Open(Stream stream, string? path)
-    {
-        var ms = new MemoryStream();
-        stream.CopyTo(ms);
-        ms.Position = 0;
-        return new GCDump(ms, path);
+        return new GCDump(stream);
     }
 
     /// <summary>
@@ -71,7 +55,7 @@ public sealed class GCDump : IDisposable
 
         var list = BuildTypeAggregates(headers, maxRows: rows);
 
-        return new TableReport(headers, list, _path is null ? null : Path.GetFileName(_path));
+        return new TableReport(headers, list);
     }
 
     public void Dispose() => _data.Dispose();
@@ -87,9 +71,7 @@ public sealed class GCDump : IDisposable
 
         try
         {
-            GCHeapDump heapDump = !string.IsNullOrEmpty(_path)
-                ? new GCHeapDump(_path!)
-                : new GCHeapDump(_data, _path ?? "input.gcdump");
+            var heapDump = new GCHeapDump(_data, _data.ToString());
 
             _graph = heapDump.MemoryGraph ?? throw new InvalidOperationException("GCHeapDump.MemoryGraph returned null.");
         }
