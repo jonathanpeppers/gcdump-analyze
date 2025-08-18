@@ -2,11 +2,11 @@
 
 Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
 ---|---|---|---
-System.String | 35967 | 148572 | 567558
-System.Byte[] | 2782 | 45174 | 564114
-System.Object | 12523 | 154817 | 560824
-System.Collections.Generic.List`1 | 23160 | 108981 | 558048
-System.Collections.Generic.Dictionary`2 | 322 | 5117 | 554580
-System.Delegate[] | 44580 | 196841 | 550614
-System.Int32[] | 14088 | 101462 | 547279
-Type7 | 32988 | 31931 | 544320
+[static vars] | 1 | 0 | 2350790
+RuntimeTypeCache | 108 | 17280 | 667785
+System.Reflection.RuntimeMethodInfo | 3409 | 354536 | 662698
+System.Reflection.RuntimePropertyInfo | 800 | 83200 | 576762
+System.String | 6913 | 518562 | 518562
+MemberInfoCache<System.Reflection.RuntimeMethodInfo> | 83 | 4648 | 438171
+Node<System.Reflection.MemberInfo,System.ComponentModel.TypeConverter> | 61 | 2928 | 417332
+System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MemberInfo,System.ComponentModel.TypeConverter> | 1 | 32 | 384470

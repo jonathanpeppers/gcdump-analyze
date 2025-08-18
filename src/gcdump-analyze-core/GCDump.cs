@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
+using Graphs;
+using Microsoft.Diagnostics.Tracing;
 
 namespace DotNet.GCDump.Analyze;
 
@@ -13,6 +15,7 @@ public sealed class GCDump : IDisposable
 {
     private readonly MemoryStream _data;
     private readonly string? _path;
+    private MemoryGraph? _graph;
 
     private GCDump(MemoryStream data, string? path)
     {
@@ -49,20 +52,14 @@ public sealed class GCDump : IDisposable
     }
 
     /// <summary>
-    /// Generate a report of object types ordered by inclusive size (pseudo-analysis).
-    /// Returns a TableReport with ordered columns and rows.
+    /// Generate a report of object types ordered by inclusive size.
+    /// Uses TraceEvent's MemoryGraph and SpanningTree to calculate per-object retained sizes,
+    /// and aggregates by type name.
     /// </summary>
     public TableReport GetReportByInclusiveSize(int rows)
     {
         if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
-
-        // Deterministic pseudo summary derived from file bytes.
-        _data.Position = 0;
-        byte[] hash;
-        using (var sha256 = SHA256.Create())
-        {
-            hash = sha256.ComputeHash(_data);
-        }
+        EnsureLoaded();
 
         var headers = new[]
         {
@@ -72,50 +69,131 @@ public sealed class GCDump : IDisposable
             "Inclusive Size (Bytes)"
         };
 
-        var list = new List<TableRow>(rows);
-
-        // Use hash bytes to generate deterministic numbers.
-        // Ensure decreasing inclusive sizes to produce a plausible ranking.
-        long baseInclusive = Math.Max(10_000, (_data.Length % 1_000_000) + 50_000);
-        var rnd = new Random(BitConverter.ToInt32(hash, 0));
-
-        for (int i = 0; i < rows; i++)
-        {
-            var typeName = i switch
-            {
-                0 => "System.String",
-                1 => "System.Byte[]",
-                2 => "System.Object",
-                3 => "System.Collections.Generic.List`1",
-                4 => "System.Collections.Generic.Dictionary`2",
-                5 => "System.Delegate[]",
-                6 => "System.Int32[]",
-                _ => $"Type{i}"
-            };
-
-            // Generate values with some spread and strictly descending inclusive size.
-            int count = Math.Max(1, rnd.Next(100, 50_000));
-            long size = Math.Max(24, (long)rnd.Next(1_000, 200_000));
-            long inclusive = baseInclusive - (i * Math.Max(1_000, (int)(_data.Length % 5000 + 1000))) + rnd.Next(0, 999);
-            if (inclusive < size) inclusive = size + rnd.Next(0, 1000);
-
-            var row = new TableRow(new Dictionary<string, object?>
-            {
-                [headers[0]] = typeName,
-                [headers[1]] = count,
-                [headers[2]] = size,
-                [headers[3]] = inclusive
-            });
-            list.Add(row);
-        }
-
-        // Sort rows by inclusive size descending
-        list.Sort((a, b) => Comparer<long>.Default.Compare(
-            Convert.ToInt64(b[headers[3]]),
-            Convert.ToInt64(a[headers[3]])));
+        var list = BuildTypeAggregates(headers, maxRows: rows);
 
         return new TableReport(headers, list, _path is null ? null : Path.GetFileName(_path));
     }
 
     public void Dispose() => _data.Dispose();
+
+    private void EnsureLoaded()
+    {
+        if (_graph is not null)
+            return;
+
+        // Build MemoryGraph from the gcdump stream or path.
+        // Prefer using the original stream to avoid re-IO if we have it.
+        _data.Position = 0;
+
+        try
+        {
+            GCHeapDump heapDump = !string.IsNullOrEmpty(_path)
+                ? new GCHeapDump(_path!)
+                : new GCHeapDump(_data, _path ?? "input.gcdump");
+
+            _graph = heapDump.MemoryGraph ?? throw new InvalidOperationException("GCHeapDump.MemoryGraph returned null.");
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to open or parse the .gcdump file.", ex);
+        }
+    }
+
+    private List<TableRow> BuildTypeAggregates(IReadOnlyList<string> headers, int maxRows)
+    {
+        var graph = _graph ?? throw new InvalidOperationException("Graph not loaded.");
+
+        // Compute retained sizes per node using SpanningTree dominators.
+        var retained = new ulong[(int)graph.NodeIndexLimit];
+        var nodeStorage = graph.AllocNodeStorage();
+        for (NodeIndex i = 0; i < graph.NodeIndexLimit; i++)
+        {
+            var node = graph.GetNode(i, nodeStorage);
+            retained[(int)i] = (ulong)node.Size;
+        }
+
+        // Build a post-order index for propagation similar to HeapSnapshot.
+        var postOrder = BuildPostOrderIndex(graph);
+
+        var spanningTree = new SpanningTree(graph, TextWriter.Null);
+        spanningTree.ForEach(null!);
+
+        int nodeCount = (int)graph.NodeIndexLimit;
+        for (int p = 0; p < nodeCount - 1; ++p) // Exclude the root (last in post-order)
+        {
+            int nodeIndex = postOrder[p];
+            int dominatorOrdinal = (int)spanningTree.Parent((NodeIndex)nodeIndex);
+            if (dominatorOrdinal >= 0)
+            {
+                retained[dominatorOrdinal] += retained[nodeIndex];
+            }
+        }
+
+        var typeStorage = graph.AllocTypeNodeStorage();
+        var byType = new Dictionary<string, (long Count, long Size, long Inclusive)>();
+
+        for (NodeIndex i = 0; i < graph.NodeIndexLimit; i++)
+        {
+            if (i == graph.RootIndex) continue; // skip root
+            var node = graph.GetNode(i, nodeStorage);
+            var type = graph.GetType(node.TypeIndex, typeStorage);
+            string name = type.Name;
+
+            if (!byType.TryGetValue(name, out var agg)) agg = default;
+            agg.Count += 1;
+            agg.Size += node.Size;
+            agg.Inclusive += unchecked((long)retained[(int)i]);
+            byType[name] = agg;
+        }
+
+        var rows = byType.Select(kvp => new TableRow(new Dictionary<string, object?>
+        {
+            [headers[0]] = kvp.Key,
+            [headers[1]] = kvp.Value.Count,
+            [headers[2]] = kvp.Value.Size,
+            [headers[3]] = kvp.Value.Inclusive,
+        }))
+        .OrderByDescending(r => Convert.ToInt64(r[headers[3]]))
+        .ThenByDescending(r => Convert.ToInt64(r[headers[2]]))
+        .ThenBy(r => (string)r[headers[0]]!)
+        .Take(maxRows)
+        .ToList();
+
+        return rows;
+    }
+
+    private static int[] BuildPostOrderIndex(MemoryGraph graph)
+    {
+        var postOrderIndex2NodeIndex = new int[(int)graph.NodeIndexLimit];
+        var visited = new System.Collections.BitArray((int)graph.NodeIndexLimit);
+        var nodeStack = new Stack<Node>();
+        int postOrderIndex = 0;
+
+        var rootNode = graph.GetNode(graph.RootIndex, graph.AllocNodeStorage());
+        rootNode.ResetChildrenEnumeration();
+        nodeStack.Push(rootNode);
+
+        while (nodeStack.Count > 0)
+        {
+            var currentNode = nodeStack.Peek();
+            NodeIndex nextChild = currentNode.GetNextChildIndex();
+            if (nextChild != NodeIndex.Invalid)
+            {
+                if (visited.Get((int)nextChild))
+                    continue;
+                var childNode = graph.GetNode(nextChild, graph.AllocNodeStorage());
+                childNode.ResetChildrenEnumeration();
+                nodeStack.Push(childNode);
+                visited.Set((int)nextChild, true);
+            }
+            else
+            {
+                postOrderIndex2NodeIndex[postOrderIndex] = (int)currentNode.Index;
+                postOrderIndex++;
+                nodeStack.Pop();
+            }
+        }
+
+        return postOrderIndex2NodeIndex;
+    }
 }

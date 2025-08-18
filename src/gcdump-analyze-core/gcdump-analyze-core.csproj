@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Diagnostics.Monitoring.EventPipe" Version="9.0.637302" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.23" />
   </ItemGroup>
 
 </Project>
