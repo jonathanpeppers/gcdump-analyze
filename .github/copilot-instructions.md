@@ -9,3 +9,4 @@ This repository is a set of tools for analyzing `*.gcdump` files:
 * [Documentation Links](instructions/documentation-links.md)
 * [Example Implementations](instructions/example-implementations.md)
 * [Core Library](instructions/gcdump-analyze-core.md)
+* [MCP Server](instructions/gcdump-analyze-mcp.md)
