@@ -5,7 +5,7 @@
 
 * `GCDump` type represents a `*.gcdump` file. Has expected APIs for opening the file with a `string path` and `System.IO.Stream`.
 
-* `GetReportByInclusiveSize(int rows)` returns a `Dictionary<string, object>` that represents data such as:
+* `GetReportByInclusiveSize(int rows)` returns a `TableReport` that represents data such as:
 
 | Object Type                                                                                                          |  Count |   Size (Bytes) | Inclusive Size (Bytes) |
 |----------------------------------------------------------------------------------------------------------------------|-------:|---------------:|-----------------------:|
@@ -22,4 +22,20 @@ Where this is an example if passed 8 rows.
 
 * `Markdown` is a static class for rendering markdown
 
-* `Markdown.Write(Dictionary<string, object>, System.IO.TextWriter)` writes the report to the passed in `TextWriter`.
+* `Markdown.Write(TableReport, System.IO.TextWriter)` writes the report to the passed in `TextWriter`.
+
+## Types
+
+```csharp
+public sealed class TableReport
+{
+  public IReadOnlyList<string> Columns { get; }
+  public IReadOnlyList<TableRow> Rows { get; }
+  public string? Source { get; }
+}
+
+public sealed class TableRow : IReadOnlyDictionary<string, object?>
+{
+  // Access values by column name; values should provide meaningful ToString().
+}
+```

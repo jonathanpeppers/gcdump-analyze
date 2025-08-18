@@ -50,12 +50,9 @@ public sealed class GCDump : IDisposable
 
     /// <summary>
     /// Generate a report of object types ordered by inclusive size (pseudo-analysis).
-    /// The result is a dictionary with keys:
-    /// - "columns": string[] headers
-    /// - "rows": List<Dictionary<string, object>> row values with matching keys
-    /// - "source": string? optional display for the source file name
+    /// Returns a TableReport with ordered columns and rows.
     /// </summary>
-    public Dictionary<string, object> GetReportByInclusiveSize(int rows)
+    public TableReport GetReportByInclusiveSize(int rows)
     {
         if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
 
@@ -75,7 +72,7 @@ public sealed class GCDump : IDisposable
             "Inclusive Size (Bytes)"
         };
 
-        var list = new List<Dictionary<string, object>>(rows);
+        var list = new List<TableRow>(rows);
 
         // Use hash bytes to generate deterministic numbers.
         // Ensure decreasing inclusive sizes to produce a plausible ranking.
@@ -102,27 +99,22 @@ public sealed class GCDump : IDisposable
             long inclusive = baseInclusive - (i * Math.Max(1_000, (int)(_data.Length % 5000 + 1000))) + rnd.Next(0, 999);
             if (inclusive < size) inclusive = size + rnd.Next(0, 1000);
 
-            var row = new Dictionary<string, object>
+            var row = new TableRow(new Dictionary<string, object?>
             {
                 [headers[0]] = typeName,
                 [headers[1]] = count,
                 [headers[2]] = size,
                 [headers[3]] = inclusive
-            };
+            });
             list.Add(row);
         }
 
         // Sort rows by inclusive size descending
         list.Sort((a, b) => Comparer<long>.Default.Compare(
-            (long)b[headers[3]],
-            (long)a[headers[3]]));
+            Convert.ToInt64(b[headers[3]]),
+            Convert.ToInt64(a[headers[3]])));
 
-        return new Dictionary<string, object>
-        {
-            ["columns"] = headers,
-            ["rows"] = list,
-            ["source"] = _path is null ? null! : Path.GetFileName(_path)
-        };
+        return new TableReport(headers, list, _path is null ? null : Path.GetFileName(_path));
     }
 
     public void Dispose() => _data.Dispose();

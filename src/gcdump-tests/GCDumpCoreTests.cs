@@ -18,8 +18,8 @@ public class GCDumpCoreTests
 
         Assert.NotNull(report1);
         Assert.NotNull(report2);
-        Assert.Equal(5, ((List<Dictionary<string, object>>)report1["rows"]).Count);
-        Assert.Equal(3, ((List<Dictionary<string, object>>)report2["rows"]).Count);
+        Assert.Equal(5, report1.Rows.Count);
+        Assert.Equal(3, report2.Rows.Count);
     }
 
     [Fact]
