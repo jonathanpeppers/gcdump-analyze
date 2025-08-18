@@ -1,2 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.Monitoring.EventPipe" Version="9.0.637302" />
+  </ItemGroup>
+
 </Project>

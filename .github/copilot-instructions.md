@@ -7,3 +7,4 @@ This repository is a set of tools for analyzing `*.gcdump` files:
 
 * [Tech Stack and Repo Structure](instructions/stack-and-structure.md)
 * [Example Implementations](instructions/example-implementations.md)
+* [Core Library](instructions/gcdump-analyze-core.md)

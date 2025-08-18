@@ -1,0 +1,25 @@
+# Core Library
+
+* Uses `Microsoft.Diagnostics.Monitoring.EventPipe` from the `dotnet-tools` feed:
+  * https://dev.azure.com/dnceng/public/_artifacts/feed/dotnet-tools/NuGet/Microsoft.Diagnostics.Monitoring.EventPipe/overview/9.0.637302
+
+* `GCDump` type represents a `*.gcdump` file. Has expected APIs for opening the file with a `string path` and `System.IO.Stream`.
+
+* `GetReportByInclusiveSize(int rows)` returns a `Dictionary<string, object>` that represents data such as:
+
+| Object Type                                                                                                          |  Count |   Size (Bytes) | Inclusive Size (Bytes) |
+|----------------------------------------------------------------------------------------------------------------------|-------:|---------------:|-----------------------:|
+| Dictionary<Microsoft.Maui.Controls.BindableProperty, Microsoft.Maui.Controls.BindableObject.BindablePropertyContext> |  4,025 |        322,000 |             33,105,512 |
+| Microsoft.Maui.Controls.BindableObject.BindablePropertyContext                                                       | 32,279 |      1,807,624 |             30,969,496 |
+| Delegate[]                                                                                                           |    793 |         76,904 |             28,169,872 |
+| List<Microsoft.Maui.Controls.Element>                                                                                |  2,368 |         75,776 |             27,681,536 |
+| Microsoft.Maui.Controls.Element[]                                                                                    |    718 |         50,624 |             27,667,744 |
+| Microsoft.Maui.Controls.SetterSpecificityList                                                                        | 32,279 |      4,131,712 |             25,267,016 |
+| Entry<Microsoft.Maui.Controls.BindableProperty, Microsoft.Maui.Controls.BindableObject.BindablePropertyContext>      |  1,025 |      1,101,248 |             24,822,216 |
+| Microsoft.Maui.Controls.Grid                                                                                         |    208 |        174,720 |             21,786,456 |
+
+Where this is an example if passed 8 rows.
+
+* `Markdown` is a static class for rendering markdown
+
+* `Markdown.Write(Dictionary<string, object>, System.IO.TextWriter)` writes the report to the passed in `TextWriter`.

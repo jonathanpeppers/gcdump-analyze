@@ -1,4 +1,5 @@
 # Example Source Code
 
-* https://github.com/1hub/dotnet-heapview
+* .NET diagnostics repo: https://github.com/dotnet/diagnostics
+* Filip's heapview tool: https://github.com/1hub/dotnet-heapview
 * https://github.com/1hub/dotnet-heapview/blob/master/src/OneHub.Diagnostics.HeapView/MonoHeapSnapshotConverter.cs
