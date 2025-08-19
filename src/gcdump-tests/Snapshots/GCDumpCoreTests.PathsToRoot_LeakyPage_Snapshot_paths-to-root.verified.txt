@@ -1,0 +1,9 @@
+﻿Object Type | Reference Count
+---|---
+MauiApp3.LeakyPage | 4
+  PropertyChangedEventHandler | 4
+    Object[] | 4
+      PropertyChangedEventHandler | 4
+        Microsoft.Maui.Controls.Window | 4
+          Microsoft.Maui.MauiWinUIWindow [RefCount Handle] | 4
+            Microsoft.Maui.ApplicationModel.WindowStateManagerImplementation | 4

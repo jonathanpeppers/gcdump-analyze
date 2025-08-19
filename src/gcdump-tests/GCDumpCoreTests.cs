@@ -77,6 +77,20 @@ public class GCDumpCoreTests
             .UseTextForParameters("markdown-by-name");
     }
 
+    [Fact]
+    public async Task PathsToRoot_LeakyPage_Snapshot()
+    {
+        using var dump = GCDump.Open(GetFilePath("test1.gcdump"));
+        var table = dump.GetPathsToRoot("LeakyPage");
+
+        using var sw = new StringWriter();
+        Markdown.Write(table, sw);
+
+        await VerifyXunit.Verifier.Verify(sw.ToString())
+            .UseDirectory(Path.Combine(GetProjectDir(), "Snapshots"))
+            .UseTextForParameters("paths-to-root");
+    }
+
     private static string GetFilePath(string fileName) =>
         Path.Combine(GetDataDir(), fileName);
 

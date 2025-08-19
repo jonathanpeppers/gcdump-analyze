@@ -11,6 +11,7 @@
 * `GetReportBySize(int rows)` returns a `TableReport` sorted by shallow Size (Bytes) with the same columns.
 * `GetReportByCount(int rows)` returns a `TableReport` sorted by Count with the same columns.
 * `GetReportByName(string nameContains)` returns a `TableReport` filtered to rows whose Object Type contains the substring (case-insensitive), sorted by Inclusive Size.
+* `GetPathsToRoot(string nameContains)` returns a markdown-ready table representing the hot paths to GC roots for matching types; columns: `Object Type` (indented) and `Reference Count`.
 
 | Object Type                                                                                                          |  Count |   Size (Bytes) | Inclusive Size (Bytes) |
 |----------------------------------------------------------------------------------------------------------------------|-------:|---------------:|-----------------------:|

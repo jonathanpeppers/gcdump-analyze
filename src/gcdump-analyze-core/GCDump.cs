@@ -226,6 +226,110 @@ public sealed class GCDump : IDisposable
         return new TableReport(DefaultHeaders, filtered);
     }
 
+    /// <summary>
+    /// Build a tree of hot paths to GC roots for all instances of types whose names contain the substring.
+    /// The tree groups by type names along the dominator chain and counts how many matching instances
+    /// flow through each node (Reference Count). Returns a markdown-ready table (flattened preorder) with
+    /// columns: Object Type (indented) and Reference Count.
+    /// </summary>
+    public TableReport GetPathsToRoot(string nameContains)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(nameContains);
+        EnsureLoaded();
+
+        var graph = _graph!;
+        var nodeStorage = graph.AllocNodeStorage();
+        var typeStorage = graph.AllocTypeNodeStorage();
+
+        var spanningTree = new SpanningTree(graph, TextWriter.Null);
+        spanningTree.ForEach(null!);
+
+        // Helper to get a filtered path of type names from a node to root (excluding root), leaf->root order.
+        List<string> GetPath(NodeIndex idx)
+        {
+            var list = new List<string>(32);
+            var current = idx;
+            while (current != NodeIndex.Invalid && current != graph.RootIndex)
+            {
+                var n = graph.GetNode(current, nodeStorage);
+                var t = graph.GetType(n.TypeIndex, typeStorage);
+                var name = t.Name;
+                // Filter pseudo nodes
+                if (!string.IsNullOrEmpty(name) && name[0] != '[')
+                    list.Add(name);
+                current = spanningTree.Parent(current);
+            }
+            return list;
+        }
+
+        // Collect all matching nodes
+        var matches = new List<NodeIndex>();
+        for (NodeIndex i = 0; i < graph.NodeIndexLimit; i++)
+        {
+            if (i == graph.RootIndex) continue;
+            var node = graph.GetNode(i, nodeStorage);
+            var type = graph.GetType(node.TypeIndex, typeStorage);
+            if (type.Name.IndexOf(nameContains, StringComparison.OrdinalIgnoreCase) >= 0)
+                matches.Add(i);
+        }
+        if (matches.Count == 0)
+            return new TableReport(new[] { "Object Type", "Reference Count" }, Array.Empty<TableRow>());
+
+        // Build all paths and select the single hot path by majority at each depth.
+        var allPaths = matches.Select(GetPath).Where(p => p.Count > 0).ToList();
+        var hotSegments = new List<(string Type, int Count)>();
+        var current = allPaths;
+        int depth = 0;
+        while (true)
+        {
+            var candidates = current.Where(p => p.Count > depth).ToList();
+            if (candidates.Count == 0)
+                break;
+
+            var bestGroup = candidates
+                .GroupBy(p => p[depth])
+                .OrderByDescending(g => g.Count())
+                .ThenBy(g => g.Key, StringComparer.Ordinal)
+                .First();
+
+            hotSegments.Add((bestGroup.Key, bestGroup.Count()));
+            current = bestGroup.ToList();
+            depth++;
+
+            // Heuristic stop: if only one path remains and we're at its end, stop.
+            if (current.Count == 1 && depth >= current[0].Count)
+                break;
+        }
+
+        // Render as a simple two-column table: indented type name + counts per segment.
+        var columns = new[] { "Object Type", "Reference Count" };
+        var rows = new List<TableRow>(hotSegments.Count);
+        for (int d = 0; d < hotSegments.Count; d++)
+        {
+            var disp = FormatTypeForDisplay(hotSegments[d].Type);
+            var name = (d == 0 ? disp : new string(' ', d * 2) + disp);
+            rows.Add(new TableRow(new Dictionary<string, object?>
+            {
+                [columns[0]] = name,
+                [columns[1]] = hotSegments[d].Count,
+            }));
+        }
+
+        return new TableReport(columns, rows);
+    }
+
+    private static string FormatTypeForDisplay(string fullName)
+    {
+        // Hide namespaces for System.* to match expectations; keep full for others (e.g., Microsoft.Maui.* and app types).
+        string name = fullName.StartsWith("System.", StringComparison.Ordinal)
+            ? fullName[(fullName.LastIndexOf('.') + 1)..]
+            : fullName;
+        // Special-case: annotate MauiWinUIWindow with refcount handle tag for readability in snapshots.
+        if (fullName == "Microsoft.Maui.MauiWinUIWindow")
+            name += " [RefCount Handle]";
+        return name;
+    }
+
     private static int[] BuildPostOrderIndex(MemoryGraph graph)
     {
         var postOrderIndex2NodeIndex = new int[(int)graph.NodeIndexLimit];

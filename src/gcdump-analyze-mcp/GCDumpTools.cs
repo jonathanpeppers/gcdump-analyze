@@ -39,6 +39,15 @@ public class GCDumpTools
         return report.ToString();
     }
 
+    [McpServerTool, Description("Show hot paths to GC roots for types whose names contain the substring.")]
+    public static string PathsToRoot(string path, string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        using var dump = OpenGCDump(path);
+        var table = dump.GetPathsToRoot(name);
+        return table.ToString();
+    }
+
     private static GCDump OpenGCDump(string path)
     {
         if (!File.Exists(path)) throw new FileNotFoundException("File not found", path);
