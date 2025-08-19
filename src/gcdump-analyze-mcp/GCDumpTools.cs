@@ -22,6 +22,14 @@ public class GCDumpTools
         return report.ToString();
     }
 
+    [McpServerTool, Description("Analyze a .gcdump file and return a markdown table of the top types by count.")]
+    public static string AnalyzeTopByCount(string path, int rows)
+    {
+        using GCDump dump = OpenGCDump(path, rows);
+        var report = dump.GetReportByCount(rows);
+        return report.ToString();
+    }
+
     private static GCDump OpenGCDump(string path, int rows)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rows);
