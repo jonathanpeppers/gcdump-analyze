@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gcdump-analyze", "src\gcdum
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gcdump-analyze-mcp", "src\gcdump-analyze-mcp\gcdump-analyze-mcp.csproj", "{E1BF5D1C-A11C-456D-8E98-0950B3A8135A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gcdump-analyze-tests", "src\gcdump-analyze-tests\gcdump-analyze-tests.csproj", "{9EA214DA-8219-4AFE-8BFE-419C025B49B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,18 @@ Global
 		{E1BF5D1C-A11C-456D-8E98-0950B3A8135A}.Release|x64.Build.0 = Release|Any CPU
 		{E1BF5D1C-A11C-456D-8E98-0950B3A8135A}.Release|x86.ActiveCfg = Release|Any CPU
 		{E1BF5D1C-A11C-456D-8E98-0950B3A8135A}.Release|x86.Build.0 = Release|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Debug|x64.Build.0 = Debug|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Debug|x86.Build.0 = Debug|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Release|x64.ActiveCfg = Release|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Release|x64.Build.0 = Release|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Release|x86.ActiveCfg = Release|Any CPU
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,5 +79,6 @@ Global
 		{E8D03695-57DF-4315-A752-CF5A76817804} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{8CEB84AC-1F5B-4507-957F-356B2B9C5E92} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{E1BF5D1C-A11C-456D-8E98-0950B3A8135A} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{9EA214DA-8219-4AFE-8BFE-419C025B49B5} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal
