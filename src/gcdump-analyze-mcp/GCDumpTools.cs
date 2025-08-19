@@ -45,7 +45,7 @@ public class GCDumpTools
         ArgumentException.ThrowIfNullOrEmpty(name);
         using var dump = OpenGCDump(path);
         var table = dump.GetPathsToRoot(name);
-        return table.ToString();
+        return table.ToTreeString();
     }
 
     private static GCDump OpenGCDump(string path)

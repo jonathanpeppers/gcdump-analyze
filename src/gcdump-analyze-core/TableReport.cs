@@ -27,6 +27,17 @@ public sealed class TableReport
         Markdown.Write(this, sw);
         return sb.ToString();
     }
+
+    /// <summary>
+    /// Convert the report to a tree-style string representation.
+    /// </summary>
+    public string ToTreeString()
+    {
+        var sb = new StringBuilder();
+        using var sw = new StringWriter(sb);
+        Markdown.WriteTree(this, sw);
+        return sb.ToString();
+    }
 }
 
 /// <summary>

@@ -84,7 +84,7 @@ public class GCDumpCoreTests
         var table = dump.GetPathsToRoot("LeakyPage");
 
         using var sw = new StringWriter();
-        Markdown.Write(table, sw);
+        Markdown.WriteTree(table, sw);
 
         await VerifyXunit.Verifier.Verify(sw.ToString())
             .UseDirectory(Path.Combine(GetProjectDir(), "Snapshots"))
