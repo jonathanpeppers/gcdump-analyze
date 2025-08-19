@@ -9,6 +9,7 @@
   * Object Type, Count, Size (Bytes), Inclusive Size (Bytes)
 
 * `GetReportBySize(int rows)` returns a `TableReport` sorted by shallow Size (Bytes) with the same columns.
+* `GetReportByCount(int rows)` returns a `TableReport` sorted by Count with the same columns.
 
 | Object Type                                                                                                          |  Count |   Size (Bytes) | Inclusive Size (Bytes) |
 |----------------------------------------------------------------------------------------------------------------------|-------:|---------------:|-----------------------:|
@@ -32,6 +33,8 @@ Where this is an example if passed 8 rows.
 * Parsing: uses `Microsoft.Diagnostics.Tracing` (`GCHeapDump`) to load the dump into a `MemoryGraph`.
 * Retained size: computed via `SpanningTree` dominators; attribution avoids double-counting within same-type chains.
 * Output: `TableReport` is stable and used by CLI, tests, and MCP server tools.
+* Sorting: Internally uses a `SortMode` enum (InclusiveSize, Size, Count) rather than booleans.
+
 
 ## Types
 

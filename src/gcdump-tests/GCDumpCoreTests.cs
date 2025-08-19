@@ -52,6 +52,21 @@ public class GCDumpCoreTests
             .UseTextForParameters("markdown-by-size");
     }
 
+    [Fact]
+    public async Task EndToEnd_Markdown_ByCount_Snapshot()
+    {
+        var gcdumpPath = Path.Combine(GetDataDir(), "test1.gcdump");
+        using var dump = GCDump.Open(gcdumpPath);
+        var report = dump.GetReportByCount(8);
+
+        using var sw = new StringWriter();
+        Markdown.Write(report, sw);
+
+        await VerifyXunit.Verifier.Verify(sw.ToString())
+            .UseDirectory(Path.Combine(GetProjectDir(), "Snapshots"))
+            .UseTextForParameters("markdown-by-count");
+    }
+
     private static string GetDataDir()
     {
         // AppContext.BaseDirectory points to bin/<config>/<tfm>/ for the test assembly

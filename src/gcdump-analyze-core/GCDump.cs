@@ -14,6 +14,13 @@ public sealed class GCDump : IDisposable
     private readonly Stream _data;
     private MemoryGraph? _graph;
 
+    internal enum SortMode
+    {
+        InclusiveSize,
+        Size,
+        Count,
+    }
+
     private GCDump(Stream data) => _data = data;
 
     /// <summary>
@@ -53,7 +60,7 @@ public sealed class GCDump : IDisposable
             "Inclusive Size (Bytes)"
         };
 
-        var list = BuildTypeAggregates(headers, maxRows: rows, sortByInclusive: true);
+        var list = BuildTypeAggregates(headers, maxRows: rows, sort: SortMode.InclusiveSize);
 
         return new TableReport(headers, list);
     }
@@ -74,7 +81,28 @@ public sealed class GCDump : IDisposable
             "Inclusive Size (Bytes)"
         };
 
-        var list = BuildTypeAggregates(headers, maxRows: rows, sortByInclusive: false);
+        var list = BuildTypeAggregates(headers, maxRows: rows, sort: SortMode.Size);
+
+        return new TableReport(headers, list);
+    }
+
+    /// <summary>
+    /// Generate a report of object types ordered by object count.
+    /// </summary>
+    public TableReport GetReportByCount(int rows)
+    {
+        if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
+        EnsureLoaded();
+
+        var headers = new[]
+        {
+            "Object Type",
+            "Count",
+            "Size (Bytes)",
+            "Inclusive Size (Bytes)"
+        };
+
+        var list = BuildTypeAggregates(headers, maxRows: rows, sort: SortMode.Count);
 
         return new TableReport(headers, list);
     }
@@ -102,7 +130,7 @@ public sealed class GCDump : IDisposable
         }
     }
 
-    private List<TableRow> BuildTypeAggregates(IReadOnlyList<string> headers, int maxRows, bool sortByInclusive)
+    private List<TableRow> BuildTypeAggregates(IReadOnlyList<string> headers, int maxRows, SortMode sort)
     {
         var graph = _graph ?? throw new InvalidOperationException("Graph not loaded.");
 
@@ -172,13 +200,23 @@ public sealed class GCDump : IDisposable
             [headers[3]] = kvp.Value.Inclusive,
         }));
 
-        rows = sortByInclusive
-            ? rows.OrderByDescending(r => Convert.ToInt64(r[headers[3]]))
-                   .ThenByDescending(r => Convert.ToInt64(r[headers[2]]))
-                   .ThenBy(r => (string)r[headers[0]]!)
-            : rows.OrderByDescending(r => Convert.ToInt64(r[headers[2]]))
-                   .ThenByDescending(r => Convert.ToInt64(r[headers[3]]))
-                   .ThenBy(r => (string)r[headers[0]]!);
+        rows = sort switch
+        {
+            SortMode.InclusiveSize => rows
+                .OrderByDescending(r => Convert.ToInt64(r[headers[3]]))
+                .ThenByDescending(r => Convert.ToInt64(r[headers[2]]))
+                .ThenBy(r => (string)r[headers[0]]!),
+            SortMode.Size => rows
+                .OrderByDescending(r => Convert.ToInt64(r[headers[2]]))
+                .ThenByDescending(r => Convert.ToInt64(r[headers[3]]))
+                .ThenBy(r => (string)r[headers[0]]!),
+            SortMode.Count => rows
+                .OrderByDescending(r => Convert.ToInt64(r[headers[1]]))
+                .ThenByDescending(r => Convert.ToInt64(r[headers[2]]))
+                .ThenByDescending(r => Convert.ToInt64(r[headers[3]]))
+                .ThenBy(r => (string)r[headers[0]]!),
+            _ => rows
+        };
 
         var top = rows
             .Take(maxRows)
