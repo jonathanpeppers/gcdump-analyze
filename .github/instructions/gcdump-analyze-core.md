@@ -1,3 +1,7 @@
+---
+applyTo: "src/gcdump-analyze-core/**"
+---
+
 # Core Library
 
 * Uses `Microsoft.Diagnostics.Monitoring.EventPipe` from the `dotnet-tools` feed:

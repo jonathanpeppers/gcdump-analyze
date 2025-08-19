@@ -1,3 +1,7 @@
+---
+applyTo: "src/gcdump-tests/**"
+---
+
 # Tests
 
 Use Xunit 2.

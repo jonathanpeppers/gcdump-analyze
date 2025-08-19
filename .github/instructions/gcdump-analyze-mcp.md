@@ -1,3 +1,7 @@
+---
+applyTo: "src/gcdump-analyze-mcp/**"
+---
+
 # gcdump-analyze MCP Server
 
 This project exposes the core library via a Model Context Protocol (MCP) server with a single tool.
