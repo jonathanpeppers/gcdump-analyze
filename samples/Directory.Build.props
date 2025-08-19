@@ -1,0 +1,2 @@
+<!-- Prevent lop-level Directory.Build.props -->
+<Project/>
