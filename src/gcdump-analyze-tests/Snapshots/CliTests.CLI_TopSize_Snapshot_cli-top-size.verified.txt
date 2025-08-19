@@ -1,0 +1,10 @@
+﻿Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
+---|---|---|---
+System.String | 6913 | 518562 | 518562
+System.Reflection.RuntimeMethodInfo | 3409 | 354536 | 662698
+System.Object | 6375 | 153000 | 153000
+WinRT.ObjectReference<WinRT.Interop.IUnknownVftbl> | 1540 | 98560 | 98560
+System.Int32[] (Bytes > 10K) | 1 | 98352 | 98352
+System.Reflection.RuntimeParameterInfo | 1101 | 96888 | 218654
+System.RuntimeType | 2170 | 86800 | 86800
+System.Reflection.RuntimePropertyInfo | 800 | 83200 | 576762
