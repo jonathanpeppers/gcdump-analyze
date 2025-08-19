@@ -1,0 +1,4 @@
+Col1 | Col2 | Num
+---|---|---
+foo | bar | 42
+baz |  | 0

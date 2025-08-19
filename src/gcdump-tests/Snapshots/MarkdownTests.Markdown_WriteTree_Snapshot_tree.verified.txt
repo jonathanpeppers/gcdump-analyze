@@ -1,0 +1,5 @@
+﻿├── RootA (Count: 3)
+│   ├── Child1 (Count: 2)
+│   │   └── Leaf (Count: 1)
+│   └── Child2 (Count: 1)
+├── RootB (Count: 1)
