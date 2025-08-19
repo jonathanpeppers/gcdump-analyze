@@ -9,7 +9,7 @@ public class GCDumpCoreTests : BaseTest
     public void CanOpenByPathAndStream()
     {
         using var dump1 = GCDump.Open(GetFilePath("test1.gcdump"));
-        using var fs = File.OpenRead(GetFilePath("test2.gcdump"));
+        using var fs = File.OpenRead(GetFilePath("leakypage.gcdump"));
         using var dump2 = GCDump.Open(fs);
 
         var report1 = dump1.GetReportByInclusiveSize(5);

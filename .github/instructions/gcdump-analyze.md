@@ -159,7 +159,7 @@ gcdump-analyze top -r 8 .\data\test1.gcdump
 Top by size (shallow), default 10 rows:
 
 ```pwsh
-gcdump-analyze top-size .\data\test2.gcdump
+gcdump-analyze top-size .\data\test1.gcdump
 ```
 
 Top by count, write to a file:
