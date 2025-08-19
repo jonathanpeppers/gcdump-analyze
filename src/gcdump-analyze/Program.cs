@@ -22,10 +22,6 @@ var nameOpt = new Option<string>("--name", "-n")
 {
     Description = "Case-insensitive substring to match in type names.",
 };
-var treeOpt = new Option<bool>("--tree")
-{
-    Description = "Render a tree view (box-drawing) instead of a Markdown table.",
-};
 
 // top
 var top = new Command("top", "Show top types by Inclusive Size (retained).");
@@ -98,20 +94,16 @@ root.Add(filter);
 var roots = new Command("roots", "Show hot path(s) to GC roots for matching types.");
 roots.Arguments.Add(pathArg);
 roots.Options.Add(nameOpt);
-roots.Options.Add(treeOpt);
 roots.Options.Add(outputOpt);
 roots.SetAction(parseResult =>
 {
     var path = parseResult.GetValue(pathArg) ?? "";
     var name = parseResult.GetValue(nameOpt) ?? "";
-    var tree = parseResult.GetValue(treeOpt);
     var output = parseResult.GetValue(outputOpt);
     using var dump = GCDump.Open(path);
     var report = dump.GetPathsToRoot(name);
-    if (tree)
-        Markdown.WriteTree(report, Console.Out);
-    else
-        Markdown.Write(report, Console.Out);
+    // Always render roots as a tree view
+    Markdown.WriteTree(report, Console.Out);
 });
 root.Add(roots);
 

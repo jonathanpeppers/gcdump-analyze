@@ -41,7 +41,6 @@ Common options
 
 - `-r, --rows <n>`: Number of rows to include (default: 10) — applies to `top`, `top-size`, and `top-count`. For `filter`, it limits the printed rows after filtering (the underlying API returns all matches). Not used by `roots`.
 - `-o, --output <file>`: Write output to the specified file (Markdown text). Defaults to stdout.
-- `--tree`: For `roots`, render a tree view using box-drawing characters instead of a table. Ignored by other commands.
 
 All commands require a `PATH` argument to the `.gcdump` file unless otherwise noted.
 
@@ -126,7 +125,7 @@ Output columns:
 
 - Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
 
-roots — Hot paths to GC roots for matching types
+roots — Hot paths to GC roots for matching types (tree)
 ------------------------------------------------
 
 Maps to: `GCDump.GetPathsToRoot(string nameContains)`
@@ -136,16 +135,11 @@ gcdump-analyze roots [options] <PATH>
 
 Options:
 	-n, --name <substring>  Required. Case-insensitive substring to match in type names.
-	--tree                   Render a tree view (box-drawing) instead of a Markdown table.
 	-o, --output <file>      Write output to file instead of stdout.
 	-?, -h, --help           Show help and usage information.
 ```
 
-Output (default): Markdown table with columns:
-
-- Object Type (indented) | Reference Count
-
-When `--tree` is supplied, output is a tree such as:
+Output: a tree view using box-drawing characters, such as:
 
 ```text
 ├── hellomauileak.LeakyPage (Count: 3)
@@ -180,10 +174,10 @@ Filter types whose names contain "LeakyPage":
 gcdump-analyze filter -n LeakyPage .\data\leakypage.gcdump
 ```
 
-Show hot root path for types containing "LeakyPage" as a tree:
+Show hot root path for types containing "LeakyPage":
 
 ```pwsh
-gcdump-analyze roots -n LeakyPage --tree .\data\leakypage.gcdump
+gcdump-analyze roots -n LeakyPage .\data\leakypage.gcdump
 ```
 
 Errors and exit codes
@@ -200,8 +194,8 @@ Implementation notes (for maintainers)
 
 - Use System.CommandLine to define subcommands and options.
 - For each command: open with `using var dump = GCDump.Open(path);`, call the respective API, then render:
-	- Table (default): `Markdown.Write(report, Console.Out)`
-	- Tree (`roots --tree`): `Markdown.WriteTree(report, Console.Out)`
+	- Tables: `Markdown.Write(report, Console.Out)` for top/top-size/top-count/filter
+	- Roots (always tree): `Markdown.WriteTree(report, Console.Out)`
 - Respect `--output` by opening a `StreamWriter` to the file instead of stdout.
 - Keep column names and sort behavior exactly as returned by `TableReport` from the core library.
 

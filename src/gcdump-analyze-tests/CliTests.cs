@@ -93,23 +93,10 @@ public class CliTests : BaseTest
     }
 
     [Fact]
-    public async Task CLI_Roots_Table_Snapshot()
-    {
-        var path = GetFilePath("test1.gcdump");
-        var (code, stdout, stderr) = await RunCliAsync("roots", "-n", "LeakyPage", path);
-        Assert.Equal(0, code);
-        Assert.True(string.IsNullOrEmpty(stderr), stderr);
-
-        await VerifyXunit.Verifier.Verify(stdout)
-            .UseDirectory(Path.Combine(GetProjectDir(), "Snapshots"))
-            .UseTextForParameters("cli-roots-table");
-    }
-
-    [Fact]
     public async Task CLI_Roots_Tree_Snapshot()
     {
         var path = GetFilePath("test1.gcdump");
-        var (code, stdout, stderr) = await RunCliAsync("roots", "-n", "LeakyPage", "--tree", path);
+        var (code, stdout, stderr) = await RunCliAsync("roots", "-n", "LeakyPage", path);
         Assert.Equal(0, code);
         Assert.True(string.IsNullOrEmpty(stderr), stderr);
 
