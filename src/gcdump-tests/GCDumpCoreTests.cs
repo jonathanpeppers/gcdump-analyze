@@ -8,9 +8,8 @@ public class GCDumpCoreTests
     [Fact]
     public void CanOpenByPathAndStream()
     {
-        var dataDir = GetDataDir();
-        using var dump1 = GCDump.Open(Path.Combine(dataDir, "test1.gcdump"));
-        using var fs = File.OpenRead(Path.Combine(dataDir, "test2.gcdump"));
+        using var dump1 = GCDump.Open(GetFilePath("test1.gcdump"));
+        using var fs = File.OpenRead(GetFilePath("test2.gcdump"));
         using var dump2 = GCDump.Open(fs);
 
         var report1 = dump1.GetReportByInclusiveSize(5);
@@ -25,8 +24,7 @@ public class GCDumpCoreTests
     [Fact]
     public async Task EndToEnd_Markdown_Snapshot()
     {
-        var gcdumpPath = Path.Combine(GetDataDir(), "test1.gcdump");
-        using var dump = GCDump.Open(gcdumpPath);
+        using var dump = GCDump.Open(GetFilePath("test1.gcdump"));
         var report = dump.GetReportByInclusiveSize(8);
 
         using var sw = new StringWriter();
@@ -40,8 +38,7 @@ public class GCDumpCoreTests
     [Fact]
     public async Task EndToEnd_Markdown_BySize_Snapshot()
     {
-        var gcdumpPath = Path.Combine(GetDataDir(), "test1.gcdump");
-        using var dump = GCDump.Open(gcdumpPath);
+        using var dump = GCDump.Open(GetFilePath("test1.gcdump"));
         var report = dump.GetReportBySize(8);
 
         using var sw = new StringWriter();
@@ -55,8 +52,7 @@ public class GCDumpCoreTests
     [Fact]
     public async Task EndToEnd_Markdown_ByCount_Snapshot()
     {
-        var gcdumpPath = Path.Combine(GetDataDir(), "test1.gcdump");
-        using var dump = GCDump.Open(gcdumpPath);
+        using var dump = GCDump.Open(GetFilePath("test1.gcdump"));
         var report = dump.GetReportByCount(8);
 
         using var sw = new StringWriter();
@@ -66,6 +62,9 @@ public class GCDumpCoreTests
             .UseDirectory(Path.Combine(GetProjectDir(), "Snapshots"))
             .UseTextForParameters("markdown-by-count");
     }
+
+    private static string GetFilePath(string fileName) =>
+        Path.Combine(GetDataDir(), fileName);
 
     private static string GetDataDir()
     {
