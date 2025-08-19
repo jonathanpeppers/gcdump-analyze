@@ -11,6 +11,13 @@ namespace DotNet.GCDump.Analyze;
 /// </summary>
 public sealed class GCDump : IDisposable
 {
+    private static readonly IReadOnlyList<string> DefaultHeaders = 
+    [
+        "Object Type",
+        "Count",
+        "Size (Bytes)",
+        "Inclusive Size (Bytes)"
+    ];
     private readonly Stream _data;
     private MemoryGraph? _graph;
 
@@ -52,17 +59,9 @@ public sealed class GCDump : IDisposable
         if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
         EnsureLoaded();
 
-        var headers = new[]
-        {
-            "Object Type",
-            "Count",
-            "Size (Bytes)",
-            "Inclusive Size (Bytes)"
-        };
+        var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.InclusiveSize);
 
-        var list = BuildTypeAggregates(headers, maxRows: rows, sort: SortMode.InclusiveSize);
-
-        return new TableReport(headers, list);
+        return new TableReport(DefaultHeaders, list);
     }
 
     /// <summary>
@@ -73,17 +72,9 @@ public sealed class GCDump : IDisposable
         if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
         EnsureLoaded();
 
-        var headers = new[]
-        {
-            "Object Type",
-            "Count",
-            "Size (Bytes)",
-            "Inclusive Size (Bytes)"
-        };
+        var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.Size);
 
-        var list = BuildTypeAggregates(headers, maxRows: rows, sort: SortMode.Size);
-
-        return new TableReport(headers, list);
+        return new TableReport(DefaultHeaders, list);
     }
 
     /// <summary>
@@ -94,17 +85,9 @@ public sealed class GCDump : IDisposable
         if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
         EnsureLoaded();
 
-        var headers = new[]
-        {
-            "Object Type",
-            "Count",
-            "Size (Bytes)",
-            "Inclusive Size (Bytes)"
-        };
+        var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.Count);
 
-        var list = BuildTypeAggregates(headers, maxRows: rows, sort: SortMode.Count);
-
-        return new TableReport(headers, list);
+        return new TableReport(DefaultHeaders, list);
     }
 
     public void Dispose() => _data.Dispose();
@@ -130,8 +113,9 @@ public sealed class GCDump : IDisposable
         }
     }
 
-    private List<TableRow> BuildTypeAggregates(IReadOnlyList<string> headers, int maxRows, SortMode sort)
+    private List<TableRow> BuildTypeAggregates(int maxRows, SortMode sort)
     {
+        var headers = DefaultHeaders;
         var graph = _graph ?? throw new InvalidOperationException("Graph not loaded.");
 
         // Compute retained sizes per node using SpanningTree dominators.
