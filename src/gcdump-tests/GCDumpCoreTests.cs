@@ -63,6 +63,20 @@ public class GCDumpCoreTests
             .UseTextForParameters("markdown-by-count");
     }
 
+    [Fact]
+    public async Task EndToEnd_Markdown_ByName_Snapshot()
+    {
+        using var dump = GCDump.Open(GetFilePath("test1.gcdump"));
+        var report = dump.GetReportByName("LeakyPage");
+
+        using var sw = new StringWriter();
+        Markdown.Write(report, sw);
+
+        await VerifyXunit.Verifier.Verify(sw.ToString())
+            .UseDirectory(Path.Combine(GetProjectDir(), "Snapshots"))
+            .UseTextForParameters("markdown-by-name");
+    }
+
     private static string GetFilePath(string fileName) =>
         Path.Combine(GetDataDir(), fileName);
 

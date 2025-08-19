@@ -208,6 +208,26 @@ public sealed class GCDump : IDisposable
         return top;
     }
 
+    /// <summary>
+    /// Generate a report filtered to types whose names contain the given substring (case-insensitive),
+    /// sorted by Inclusive Size (Bytes).
+    /// </summary>
+    public TableReport GetReportByName(string nameContains)
+    {
+        if (string.IsNullOrWhiteSpace(nameContains))
+            throw new ArgumentException("Search string must be non-empty.", nameof(nameContains));
+
+        EnsureLoaded();
+
+        // Build full aggregate (all rows), sort by inclusive size, then filter.
+        var all = BuildTypeAggregates(int.MaxValue, SortMode.InclusiveSize);
+        var filtered = all
+            .Where(r => ((string)r[DefaultHeaders[0]]!).Contains(nameContains, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return new TableReport(DefaultHeaders, filtered);
+    }
+
     private static int[] BuildPostOrderIndex(MemoryGraph graph)
     {
         var postOrderIndex2NodeIndex = new int[(int)graph.NodeIndexLimit];

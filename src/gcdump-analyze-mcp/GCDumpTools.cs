@@ -30,6 +30,15 @@ public class GCDumpTools
         return report.ToString();
     }
 
+    [McpServerTool, Description("Search for types by name (case-insensitive contains) and return a markdown table sorted by inclusive size.")]
+    public static string AnalyzeByName(string path, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Search string must be non-empty.", nameof(name));
+        using var dump = GCDump.Open(path);
+        var report = dump.GetReportByName(name);
+        return report.ToString();
+    }
+
     private static GCDump OpenGCDump(string path, int rows)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rows);
