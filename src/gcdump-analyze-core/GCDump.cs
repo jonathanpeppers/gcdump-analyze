@@ -35,9 +35,8 @@ public sealed class GCDump : IDisposable
     /// </summary>
     public static GCDump Open(string path)
     {
-        return string.IsNullOrWhiteSpace(path)
-            ? throw new ArgumentException("Path must be a non-empty string.", nameof(path))
-            : new GCDump(File.OpenRead(path));
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        return new GCDump(File.OpenRead(path));
     }
 
     /// <summary>
@@ -56,7 +55,7 @@ public sealed class GCDump : IDisposable
     /// </summary>
     public TableReport GetReportByInclusiveSize(int rows)
     {
-        if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rows);
         EnsureLoaded();
 
         var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.InclusiveSize);
@@ -69,7 +68,7 @@ public sealed class GCDump : IDisposable
     /// </summary>
     public TableReport GetReportBySize(int rows)
     {
-        if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rows);
         EnsureLoaded();
 
         var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.Size);
@@ -82,7 +81,7 @@ public sealed class GCDump : IDisposable
     /// </summary>
     public TableReport GetReportByCount(int rows)
     {
-        if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows), "Must be greater than zero.");
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rows);
         EnsureLoaded();
 
         var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.Count);
@@ -214,8 +213,7 @@ public sealed class GCDump : IDisposable
     /// </summary>
     public TableReport GetReportByName(string nameContains)
     {
-        if (string.IsNullOrWhiteSpace(nameContains))
-            throw new ArgumentException("Search string must be non-empty.", nameof(nameContains));
+        ArgumentException.ThrowIfNullOrWhiteSpace(nameContains);
 
         EnsureLoaded();
 
