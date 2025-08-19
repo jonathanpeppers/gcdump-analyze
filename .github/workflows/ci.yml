@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Build (with binlogs)
+        run: |
+          dotnet build gcdump-analyze.sln -c Release -bl:bin/build.binlog
+
+      - name: Test (collect results)
+        run: |
+          dotnet test gcdump-analyze.sln -c Release \
+            --logger "trx;LogFileName=TestResults.trx" \
+            --results-directory bin \
+            -bl:bin/test.binlog
+
+      - name: Upload bin artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bin-${{ github.run_number }}
+          path: bin
+          if-no-files-found: warn
