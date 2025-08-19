@@ -8,7 +8,7 @@ public class BaseTest
         var dir = new DirectoryInfo(baseDir);
         for (int i = 0; i < 8 && dir != null; i++)
         {
-            var csproj = Path.Combine(dir.FullName, "gcdump-tests.csproj");
+            var csproj = Path.Combine(dir.FullName, "gcdump-analyze-tests.csproj");
             if (File.Exists(csproj))
                 return dir.FullName;
             dir = dir.Parent;

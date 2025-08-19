@@ -1,5 +1,5 @@
 ---
-applyTo: "src/gcdump-tests/**"
+applyTo: "src/gcdump-analyze-tests/**"
 ---
 
 # Tests

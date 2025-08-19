@@ -21,5 +21,5 @@ applyTo: "**/*.csproj"
 * `src\gcdump-analyze-core\`: class library containing shared C# code
 * `src\gcdump-analyze\`: .NET global tool, can be invoked by `gcdump-analyze foo.gcdump`
 * `src\gcdump-analyze-mcp\`: exposes functionality from `gcdump-analyze-core` as an MCP server
-* `src\gcdump-tests\`: Xunit, unit test project
+* `src\gcdump-analyze-tests\`: Xunit, unit test project
 * `samples\hellomauileak`: an example .NET MAUI app to record `.gcdump` files from
