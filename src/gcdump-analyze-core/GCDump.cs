@@ -18,6 +18,11 @@ public sealed class GCDump : IDisposable
         "Size (Bytes)",
         "Inclusive Size (Bytes)"
     ];
+    // Named indexes for DefaultHeaders to avoid magic numbers when accessing columns.
+    private const int HeaderObjectType = 0;
+    private const int HeaderCount = 1;
+    private const int HeaderSize = 2;
+    private const int HeaderInclusiveSize = 3;
     private readonly Stream _data;
     private MemoryGraph? _graph;
 
@@ -177,27 +182,27 @@ public sealed class GCDump : IDisposable
 
         var rows = byType.Select(kvp => new TableRow(new Dictionary<string, object?>
         {
-            [headers[0]] = kvp.Key,
-            [headers[1]] = kvp.Value.Count,
-            [headers[2]] = kvp.Value.Size,
-            [headers[3]] = kvp.Value.Inclusive,
+            [headers[HeaderObjectType]] = kvp.Key,
+            [headers[HeaderCount]] = kvp.Value.Count,
+            [headers[HeaderSize]] = kvp.Value.Size,
+            [headers[HeaderInclusiveSize]] = kvp.Value.Inclusive,
         }));
 
         rows = sort switch
         {
             SortMode.InclusiveSize => rows
-                .OrderByDescending(r => Convert.ToInt64(r[headers[3]]))
-                .ThenByDescending(r => Convert.ToInt64(r[headers[2]]))
-                .ThenBy(r => (string)r[headers[0]]!),
+                .OrderByDescending(r => Convert.ToInt64(r[headers[HeaderInclusiveSize]]))
+                .ThenByDescending(r => Convert.ToInt64(r[headers[HeaderSize]]))
+                .ThenBy(r => (string)r[headers[HeaderObjectType]]!),
             SortMode.Size => rows
-                .OrderByDescending(r => Convert.ToInt64(r[headers[2]]))
-                .ThenByDescending(r => Convert.ToInt64(r[headers[3]]))
-                .ThenBy(r => (string)r[headers[0]]!),
+                .OrderByDescending(r => Convert.ToInt64(r[headers[HeaderSize]]))
+                .ThenByDescending(r => Convert.ToInt64(r[headers[HeaderInclusiveSize]]))
+                .ThenBy(r => (string)r[headers[HeaderObjectType]]!),
             SortMode.Count => rows
-                .OrderByDescending(r => Convert.ToInt64(r[headers[1]]))
-                .ThenByDescending(r => Convert.ToInt64(r[headers[2]]))
-                .ThenByDescending(r => Convert.ToInt64(r[headers[3]]))
-                .ThenBy(r => (string)r[headers[0]]!),
+                .OrderByDescending(r => Convert.ToInt64(r[headers[HeaderCount]]))
+                .ThenByDescending(r => Convert.ToInt64(r[headers[HeaderSize]]))
+                .ThenByDescending(r => Convert.ToInt64(r[headers[HeaderInclusiveSize]]))
+                .ThenBy(r => (string)r[headers[HeaderObjectType]]!),
             _ => rows
         };
 
@@ -220,7 +225,7 @@ public sealed class GCDump : IDisposable
         // Build full aggregate (all rows), sort by inclusive size, then filter.
         var all = BuildTypeAggregates(int.MaxValue, SortMode.InclusiveSize);
         var filtered = all
-            .Where(r => ((string)r[DefaultHeaders[0]]!).Contains(nameContains, StringComparison.OrdinalIgnoreCase))
+            .Where(r => ((string)r[DefaultHeaders[HeaderObjectType]]!).Contains(nameContains, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         return new TableReport(DefaultHeaders, filtered);
