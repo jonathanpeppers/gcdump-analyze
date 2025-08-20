@@ -273,7 +273,7 @@ public sealed class GCDump : IDisposable
                 matches.Add(i);
         }
         if (matches.Count == 0)
-            return new TableReport(new[] { "Object Type", "Reference Count" }, Array.Empty<TableRow>());
+            return new TableReport(["Object Type", "Reference Count"], Array.Empty<TableRow>());
 
         // Build all paths and select the single hot path by majority at each depth.
         var allPaths = matches.Select(GetPath).Where(p => p.Count > 0).ToList();
@@ -306,8 +306,8 @@ public sealed class GCDump : IDisposable
         var rows = new List<TableRow>(hotSegments.Count);
         for (int d = 0; d < hotSegments.Count; d++)
         {
-            var disp = FormatTypeForDisplay(hotSegments[d].Type);
-            var name = (d == 0 ? disp : new string(' ', d * 2) + disp);
+            var display = hotSegments[d].Type;
+            var name = d == 0 ? display : new string(' ', d * 2) + display;
             rows.Add(new TableRow(new Dictionary<string, object?>
             {
                 [columns[0]] = name,
@@ -317,9 +317,6 @@ public sealed class GCDump : IDisposable
 
         return new TableReport(columns, rows);
     }
-
-    // TODO: could be removed in the future
-    private static string FormatTypeForDisplay(string fullName) => fullName;
 
     private static int[] BuildPostOrderIndex(MemoryGraph graph)
     {
