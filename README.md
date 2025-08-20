@@ -9,6 +9,10 @@ This repository contains a core analysis library plus two clients:
 
 This README explains how to install and use the `gcdump-analyze` .NET global tool from NuGet.org and provides example invocations.
 
+An example of the tool in action, resolving a memory leak in `LeakyPage.cs`:
+
+![Leaky Page](docs/leakypage.gif)
+
 ## Install (from NuGet)
 
 The `gcdump-analyze` CLI is published as a .NET global tool package on NuGet.org. To install it globally for your user account:
