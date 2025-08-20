@@ -318,17 +318,8 @@ public sealed class GCDump : IDisposable
         return new TableReport(columns, rows);
     }
 
-    private static string FormatTypeForDisplay(string fullName)
-    {
-        // Hide namespaces for System.* to match expectations; keep full for others (e.g., Microsoft.Maui.* and app types).
-        string name = fullName.StartsWith("System.", StringComparison.Ordinal)
-            ? fullName[(fullName.LastIndexOf('.') + 1)..]
-            : fullName;
-        // Special-case: annotate MauiWinUIWindow with refcount handle tag for readability in snapshots.
-        if (fullName == "Microsoft.Maui.MauiWinUIWindow")
-            name += " [RefCount Handle]";
-        return name;
-    }
+    // TODO: could be removed in the future
+    private static string FormatTypeForDisplay(string fullName) => fullName;
 
     private static int[] BuildPostOrderIndex(MemoryGraph graph)
     {
