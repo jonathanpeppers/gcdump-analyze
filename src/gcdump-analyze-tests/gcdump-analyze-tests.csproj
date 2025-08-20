@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\gcdump-analyze\gcdump-analyze.csproj" />
     <ProjectReference Include="..\gcdump-analyze-core\gcdump-analyze-core.csproj" />
+    <ProjectReference Include="..\gcdump-analyze-mcp\gcdump-analyze-mcp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

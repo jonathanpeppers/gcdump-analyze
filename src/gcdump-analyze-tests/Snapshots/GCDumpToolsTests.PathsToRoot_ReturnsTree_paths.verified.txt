@@ -1,0 +1,8 @@
+﻿├── hellomauileak.LeakyPage (Count: 3)
+│   └── PropertyChangedEventHandler (Count: 3)
+│       └── Delegate[] (Count: 3)
+│           └── PropertyChangedEventHandler (Count: 3)
+│               └── Microsoft.Maui.Controls.Window (Count: 3)
+│                   └── Microsoft.Maui.Controls.Element[] (Count: 3)
+│                       └── Element> (Count: 3)
+│                           └── hellomauileak.App (Count: 3)
