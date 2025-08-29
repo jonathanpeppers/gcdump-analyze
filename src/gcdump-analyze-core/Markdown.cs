@@ -12,14 +12,41 @@ public static class Markdown
         ArgumentNullException.ThrowIfNull(report);
         ArgumentNullException.ThrowIfNull(writer);
 
-        // Header
-        writer.WriteLine(string.Join(" | ", report.Columns));
-        writer.WriteLine(string.Join("|", report.Columns.Select(_ => "---")));
-
-        // Rows
+        // Calculate column widths
+        var columnWidths = new Dictionary<string, int>();
+        
+        // Initialize with header widths
+        foreach (var column in report.Columns)
+        {
+            columnWidths[column] = column.Length;
+        }
+        
+        // Check all row values to find maximum width for each column
         foreach (var row in report.Rows)
         {
-            var values = report.Columns.Select(h => row.TryGetValue(h, out var v) ? FormatValue(v) : string.Empty);
+            foreach (var column in report.Columns)
+            {
+                var value = row.TryGetValue(column, out var v) ? FormatValue(v) : string.Empty;
+                columnWidths[column] = Math.Max(columnWidths[column], value.Length);
+            }
+        }
+
+        // Header with padding
+        var headerValues = report.Columns.Select(col => col.PadRight(columnWidths[col]));
+        writer.WriteLine(string.Join(" | ", headerValues));
+        
+        // Separator line with proper padding
+        var separators = report.Columns.Select(col => new string('-', columnWidths[col]));
+        writer.WriteLine(string.Join("|", separators));
+
+        // Rows with padding
+        foreach (var row in report.Rows)
+        {
+            var values = report.Columns.Select(col =>
+            {
+                var value = row.TryGetValue(col, out var v) ? FormatValue(v) : string.Empty;
+                return value.PadRight(columnWidths[col]);
+            });
             writer.WriteLine(string.Join(" | ", values));
         }
     }
