@@ -6,7 +6,14 @@
     <ToolCommandName>gcdump-analyze</ToolCommandName>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageDescription>Analyze .gcdump files and render markdown reports.</PackageDescription>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
