@@ -37,7 +37,7 @@ public static class Markdown
         
         // Separator line with proper padding
         var separators = report.Columns.Select(col => new string('-', columnWidths[col]));
-        writer.WriteLine(string.Join("|", separators));
+        writer.WriteLine(string.Join(" | ", separators));
 
         // Rows with padding
         foreach (var row in report.Rows)
