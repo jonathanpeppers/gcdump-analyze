@@ -1,14 +1,5 @@
 {
     "servers": {
-        "gcdump-analyze-mcp": {
-            "type": "stdio",
-            "command": "dotnet",
-            "args": [
-                "run",
-                "--project",
-                "src\\gcdump-analyze-mcp\\gcdump-analyze-mcp.csproj"
-            ]
-        },
         "microsoft.docs.mcp": {
             "type": "http",
             "url": "https://learn.microsoft.com/api/mcp"

@@ -5,13 +5,8 @@ Command-line tools for analyzing .gcdump files produced by `dotnet gcdump`.
 This repository contains a core analysis library plus two clients:
 
 - `gcdump-analyze` — a .NET global tool/CLI that prints Markdown reports and tree views.
-- `gcdump-analyze-mcp` — an MCP (Model Context Protocol) server exposing the same functionality over stdio.
 
 This README explains how to install and use the `gcdump-analyze` .NET global tool from NuGet.org and provides example invocations.
-
-An example of the tool in action, resolving a memory leak in `LeakyPage.cs`:
-
-![Leaky Page](docs/leakypage.gif)
 
 ## Install (from NuGet)
 
@@ -137,10 +132,6 @@ All commands expect a single `.gcdump` file path argument.
 By default the CLI prints Markdown tables for `top`, `top-size`, `top-count`, and `filter` commands. The `roots` command prints a box-drawing tree of hot paths to GC roots.
 
 Examples of output formats are in the repository tests and snapshots.
-
-## MCP server
-
-The `gcdump-analyze-mcp` tool runs an MCP server exposing the same tools (useful for editor integrations). See `src/gcdump-analyze-mcp` for details and [`.github/instructions/gcdump-analyze-mcp.md`](.github/instructions/gcdump-analyze-mcp.md) for VS Code configuration.
 
 ## Contributing
 

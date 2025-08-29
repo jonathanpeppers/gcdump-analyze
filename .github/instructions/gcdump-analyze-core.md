@@ -38,7 +38,7 @@ Where this is an example if passed 8 rows.
 
 * Parsing: uses `Microsoft.Diagnostics.Tracing` (`GCHeapDump`) to load the dump into a `MemoryGraph`.
 * Retained size: computed via `SpanningTree` dominators; attribution avoids double-counting within same-type chains.
-* Output: `TableReport` is stable and used by CLI, tests, and MCP server tools.
+* Output: `TableReport` is stable and used by CLI, tests, etc.
 * Sorting: Internally uses a `SortMode` enum (InclusiveSize, Size, Count) rather than booleans.
 
 
