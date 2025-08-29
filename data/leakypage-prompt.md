@@ -1,4 +1,4 @@
-Review data/leakypage.gcdump
+Open data/leakypage.gcdump
 
 Why does LeakyPage leak? Explain why.
 
