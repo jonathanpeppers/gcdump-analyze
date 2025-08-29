@@ -13,7 +13,7 @@ This README explains how to install and use the `gcdump-analyze` .NET global too
 The `gcdump-analyze` CLI is published as a .NET global tool package on NuGet.org. To install it globally for your user account:
 
 ```pwsh
-dotnet tool install --global gcdump-analyze
+dotnet tool install --global gcdump-analyze --prerelease
 ```
 
 To run the tool without installing globally (one-off):
