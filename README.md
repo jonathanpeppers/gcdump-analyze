@@ -19,7 +19,7 @@ dotnet tool install --global gcdump-analyze
 To run the tool without installing globally (one-off):
 
 ```pwsh
-dotnet tool run gcdump-analyze -- [command] [options]
+dotnet tool exec -y gcdump-analyze --version 0.1.0-alpha -- [command] [options]
 ```
 
 ## Usage
