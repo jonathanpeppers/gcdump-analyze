@@ -11,13 +11,16 @@ namespace DotNet.GCDump.Analyze;
 /// </summary>
 public sealed class GCDump : IDisposable
 {
-    private static readonly IReadOnlyList<string> DefaultHeaders = 
+    private static readonly IReadOnlyList<ColumnInfo> DefaultColumnInfos = 
     [
-        "Object Type",
-        "Count",
-        "Size (Bytes)",
-        "Inclusive Size (Bytes)"
+        new ColumnInfo("Object Type", ColumnType.Text),
+        new ColumnInfo("Count", ColumnType.Numeric),
+        new ColumnInfo("Size (Bytes)", ColumnType.Numeric),
+        new ColumnInfo("Inclusive Size (Bytes)", ColumnType.Numeric)
     ];
+
+    private static readonly IReadOnlyList<string> DefaultHeaders = 
+        DefaultColumnInfos.Select(c => c.Name).ToList();
     // Named indexes for DefaultHeaders to avoid magic numbers when accessing columns.
     private const int HeaderObjectType = 0;
     private const int HeaderCount = 1;
@@ -65,7 +68,7 @@ public sealed class GCDump : IDisposable
 
         var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.InclusiveSize);
 
-        return new TableReport(DefaultHeaders, list);
+        return new TableReport(DefaultColumnInfos, list);
     }
 
     /// <summary>
@@ -78,7 +81,7 @@ public sealed class GCDump : IDisposable
 
         var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.Size);
 
-        return new TableReport(DefaultHeaders, list);
+        return new TableReport(DefaultColumnInfos, list);
     }
 
     /// <summary>
@@ -91,7 +94,7 @@ public sealed class GCDump : IDisposable
 
         var list = BuildTypeAggregates(maxRows: rows, sort: SortMode.Count);
 
-        return new TableReport(DefaultHeaders, list);
+        return new TableReport(DefaultColumnInfos, list);
     }
 
     public void Dispose() => _data.Dispose();
@@ -228,7 +231,7 @@ public sealed class GCDump : IDisposable
             .Where(r => ((string)r[DefaultHeaders[HeaderObjectType]]!).Contains(nameContains, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        return new TableReport(DefaultHeaders, filtered);
+        return new TableReport(DefaultColumnInfos, filtered);
     }
 
     /// <summary>
@@ -307,7 +310,11 @@ public sealed class GCDump : IDisposable
         }
 
         // Render as a simple two-column table: indented type name + counts per segment.
-        var columns = new[] { "Object Type", "Reference Count" };
+        var columnInfos = new ColumnInfo[] 
+        { 
+            new ColumnInfo("Object Type", ColumnType.Text), 
+            new ColumnInfo("Reference Count", ColumnType.Numeric) 
+        };
         var rows = new List<TableRow>(hotSegments.Count);
         for (int d = 0; d < hotSegments.Count; d++)
         {
@@ -315,12 +322,12 @@ public sealed class GCDump : IDisposable
             var name = d == 0 ? display : new string(' ', d * 2) + display;
             rows.Add(new TableRow(new Dictionary<string, object?>
             {
-                [columns[0]] = name,
-                [columns[1]] = hotSegments[d].Count,
+                [columnInfos[0].Name] = name,
+                [columnInfos[1].Name] = hotSegments[d].Count,
             }));
         }
 
-        return new TableReport(columns, rows);
+        return new TableReport(columnInfos, rows);
     }
 
     private static int[] BuildPostOrderIndex(MemoryGraph graph)

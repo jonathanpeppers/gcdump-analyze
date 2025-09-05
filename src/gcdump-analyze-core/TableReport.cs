@@ -3,6 +3,35 @@ using System.Text;
 namespace DotNet.GCDump.Analyze;
 
 /// <summary>
+/// Represents the type of a column for formatting purposes.
+/// </summary>
+public enum ColumnType
+{
+    /// <summary>Text column - left-aligned.</summary>
+    Text,
+    /// <summary>Numeric column - right-aligned.</summary>
+    Numeric
+}
+
+/// <summary>
+/// Represents column metadata including name and type.
+/// </summary>
+public sealed class ColumnInfo
+{
+    /// <summary>The display name of the column.</summary>
+    public string Name { get; }
+
+    /// <summary>The type of the column for formatting purposes.</summary>
+    public ColumnType Type { get; }
+
+    public ColumnInfo(string name, ColumnType type)
+    {
+        Name = name ?? throw new ArgumentNullException(nameof(name));
+        Type = type;
+    }
+}
+
+/// <summary>
 /// Represents a tabular report with named string columns and rows addressable by column name.
 /// Values are objects and should provide meaningful ToString() for rendering.
 /// </summary>
@@ -11,12 +40,21 @@ public sealed class TableReport
     /// <summary>Ordered list of column names to render.</summary>
     public IReadOnlyList<string> Columns { get; }
 
+    /// <summary>Column metadata including type information for formatting.</summary>
+    public IReadOnlyList<ColumnInfo> ColumnInfos { get; }
+
     /// <summary>Ordered list of rows in the table.</summary>
     public IReadOnlyList<TableRow> Rows { get; }
 
     public TableReport(IReadOnlyList<string> columns, IReadOnlyList<TableRow> rows)
+        : this(columns.Select(c => new ColumnInfo(c, ColumnType.Text)).ToList(), rows)
     {
-        Columns = columns ?? throw new ArgumentNullException(nameof(columns));
+    }
+
+    public TableReport(IReadOnlyList<ColumnInfo> columnInfos, IReadOnlyList<TableRow> rows)
+    {
+        ColumnInfos = columnInfos ?? throw new ArgumentNullException(nameof(columnInfos));
+        Columns = columnInfos.Select(c => c.Name).ToList();
         Rows = rows ?? throw new ArgumentNullException(nameof(rows));
     }
 
