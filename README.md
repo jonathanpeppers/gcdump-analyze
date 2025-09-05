@@ -44,16 +44,18 @@ gcdump-analyze top path\to\heap.gcdump
 
 Example output (top by inclusive size):
 
-Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
----|---|---|---
-[static vars] | 1 | 0 | 2350790
-RuntimeTypeCache | 108 | 17280 | 667785
-System.Reflection.RuntimeMethodInfo | 3409 | 354536 | 662698
-System.Reflection.RuntimePropertyInfo | 800 | 83200 | 576762
-System.String | 6913 | 518562 | 518562
-MemberInfoCache<System.Reflection.RuntimeMethodInfo> | 83 | 4648 | 438171
-System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MemberInfo,System.ComponentModel.TypeConverter> | 1 | 32 | 384470
-[static var System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MemberInfo,System.ComponentModel.TypeConverter>.s_converterCache] | 1 | 0 | 384470
+Object Type                                                               | Count | Size (Bytes) | Inclusive Size (Bytes)
+------------------------------------------------------------------------- | ----: | -----------: | ---------------------:
+[static vars]                                                             |     1 |            0 |                927,560
+Microsoft.Maui.Controls.ResourceDictionary                                |     4 |          320 |                227,888
+Android.Runtime.XAPeerMembers                                             |   139 |       11,120 |                208,368
+[other roots]                                                             |     1 |            0 |                205,216
+hellomauileak.App                                                         |     1 |          512 |                202,728
+[static var Microsoft.Maui.Controls.Application.<Current>k__BackingField] |     1 |            0 |                202,728
+System.Collections.Generic.List<Microsoft.Maui.Controls.Element>          |    27 |          864 |                198,576
+Microsoft.Maui.Controls.Element[]                                         |    17 |        1,024 |                197,776
+[other Handles]                                                           |     1 |            0 |                195,864
+System.String                                                             | 1,982 |      142,544 |                142,544
 
 Show top 8 by inclusive size:
 
@@ -69,16 +71,18 @@ gcdump-analyze top-size path\to\heap.gcdump
 
 Example output (top by shallow size):
 
-Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
----|---|---|---
-System.String | 6913 | 518562 | 518562
-System.Reflection.RuntimeMethodInfo | 3409 | 354536 | 662698
-System.Object | 6375 | 153000 | 153000
-WinRT.ObjectReference<WinRT.Interop.IUnknownVftbl> | 1540 | 98560 | 98560
-System.Int32[] (Bytes > 10K) | 1 | 98352 | 98352
-System.Reflection.RuntimeParameterInfo | 1101 | 96888 | 218654
-System.RuntimeType | 2170 | 86800 | 86800
-System.Reflection.RuntimePropertyInfo | 800 | 83200 | 576762
+Object Type                                                                     | Count | Size (Bytes) | Inclusive Size (Bytes)
+------------------------------------------------------------------------------- | ----: | -----------: | ---------------------:
+System.String                                                                   | 1,982 |      142,544 |                142,544
+System.RuntimeType                                                              | 2,740 |      109,600 |                140,912
+Microsoft.Maui.Controls.BindableProperty                                        |   486 |       62,208 |                139,976
+System.Action<Microsoft.Maui.IElementHandler,Microsoft.Maui.IElement>           |   309 |       39,552 |                109,648
+System.Int32[]                                                                  |   507 |       38,104 |                 38,104
+Microsoft.Maui.Controls.BindableProperty.BindingPropertyChangedDelegate         |   208 |       26,624 |                 26,624
+System.Collections.Generic.Dictionary<System.String,Java.Interop.JniMethodInfo> |   311 |       24,880 |                102,704
+System.RuntimeType.TypeCache                                                    |   358 |       22,912 |                 31,312
+System.Collections.Generic.Dictionary<System.String,Java.Interop.JniFieldInfo>  |   280 |       22,400 |                 26,552
+Java.Interop.JniMethodInfo                                                      |   374 |       17,952 |                 17,952
 
 Show top by object count and write to a file:
 
@@ -94,11 +98,9 @@ gcdump-analyze filter -n LeakyPage path\to\leakypage.gcdump
 
 Example output (filter by name):
 
-```text
-Object Type | Count | Size (Bytes) | Inclusive Size (Bytes)
----|---|---|---
-hellomauileak.LeakyPage | 3 | 2520 | 31800
-```
+Object Type             | Count | Size (Bytes) | Inclusive Size (Bytes)
+----------------------- | ----: | -----------: | ---------------------:
+hellomauileak.LeakyPage |     3 |        2,520 |                 31,800
 
 Show hot paths to GC roots for types containing "LeakyPage":
 
