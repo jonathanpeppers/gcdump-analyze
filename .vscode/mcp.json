@@ -12,6 +12,14 @@
         "microsoft.docs.mcp": {
             "type": "http",
             "url": "https://learn.microsoft.com/api/mcp"
+        },
+        "dotnet-agent-stdio": {
+            "type": "stdio",
+            "command": "dotnet",
+            "args": [
+                "agent",
+                "mcp"
+            ]
         }
     }
 }
