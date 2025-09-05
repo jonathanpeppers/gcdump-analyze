@@ -16,36 +16,47 @@ public static class Markdown
         var columnWidths = new Dictionary<string, int>();
         
         // Initialize with header widths
-        foreach (var column in report.Columns)
+        foreach (var columnInfo in report.ColumnInfos)
         {
-            columnWidths[column] = column.Length;
+            columnWidths[columnInfo.Name] = columnInfo.Name.Length;
         }
         
         // Check all row values to find maximum width for each column
         foreach (var row in report.Rows)
         {
-            foreach (var column in report.Columns)
+            foreach (var columnInfo in report.ColumnInfos)
             {
-                var value = row.TryGetValue(column, out var v) ? FormatValue(v) : string.Empty;
-                columnWidths[column] = Math.Max(columnWidths[column], value.Length);
+                var value = row.TryGetValue(columnInfo.Name, out var v) ? FormatValue(v) : string.Empty;
+                columnWidths[columnInfo.Name] = Math.Max(columnWidths[columnInfo.Name], value.Length);
             }
         }
 
         // Header with padding
-        var headerValues = report.Columns.Select(col => col.PadRight(columnWidths[col]));
+        var headerValues = report.ColumnInfos.Select(col => 
+            col.Type == ColumnType.Numeric 
+                ? col.Name.PadLeft(columnWidths[col.Name])
+                : col.Name.PadRight(columnWidths[col.Name]));
         writer.WriteLine(string.Join(" | ", headerValues));
         
-        // Separator line with proper padding
-        var separators = report.Columns.Select(col => new string('-', columnWidths[col]));
+        // Separator line with proper padding and alignment indicators
+        var separators = report.ColumnInfos.Select(col =>
+        {
+            var width = columnWidths[col.Name];
+            return col.Type == ColumnType.Numeric 
+                ? new string('-', width - 1) + ":"  // Right-aligned: ----:
+                : new string('-', width);           // Left-aligned: -----
+        });
         writer.WriteLine(string.Join(" | ", separators));
 
         // Rows with padding
         foreach (var row in report.Rows)
         {
-            var values = report.Columns.Select(col =>
+            var values = report.ColumnInfos.Select(col =>
             {
-                var value = row.TryGetValue(col, out var v) ? FormatValue(v) : string.Empty;
-                return value.PadRight(columnWidths[col]);
+                var value = row.TryGetValue(col.Name, out var v) ? FormatValue(v) : string.Empty;
+                return col.Type == ColumnType.Numeric
+                    ? value.PadLeft(columnWidths[col.Name])
+                    : value.PadRight(columnWidths[col.Name]);
             });
             writer.WriteLine(string.Join(" | ", values));
         }
