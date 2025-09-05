@@ -117,7 +117,7 @@ public static class Markdown
                 bool last = i == children.Count - 1;
                 bool isRoot = prefix.Length == 0;
                 var connector = isRoot ? "├── " : (last ? "└── " : "├── ");
-                var line = prefix + connector + child.Label + (child.Count.HasValue ? $" (Count: {child.Count.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)})" : string.Empty);
+                var line = prefix + connector + child.Label + (child.Count.HasValue ? $" (Count: {child.Count.Value.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)})" : string.Empty);
                 writer.WriteLine(line);
                 var nextPrefix = prefix + (isRoot ? "│   " : (last ? "    " : "│   "));
                 if (child.Children.Count > 0)
@@ -141,7 +141,7 @@ public static class Markdown
         return value switch
         {
             null => string.Empty,
-            IFormattable f when value is int || value is long => f.ToString(null, System.Globalization.CultureInfo.InvariantCulture),
+            IFormattable f when value is int || value is long => f.ToString("N0", System.Globalization.CultureInfo.InvariantCulture),
             _ => value.ToString() ?? string.Empty
         };
     }
