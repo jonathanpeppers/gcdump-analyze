@@ -36,17 +36,46 @@ public class MarkdownTests : BaseTest
     [Fact]
     public async Task Markdown_WriteTree_Snapshot()
     {
-        var columns = new[] { "Object Type", "Reference Count" };
-        var rows = new List<TableRow>
-        {
-            new(new Dictionary<string, object?> { [columns[0]] = "RootA", [columns[1]] = 3 }),
-            new(new Dictionary<string, object?> { [columns[0]] = "  Child1", [columns[1]] = 2 }),
-            new(new Dictionary<string, object?> { [columns[0]] = "    Leaf", [columns[1]] = 1 }),
-            new(new Dictionary<string, object?> { [columns[0]] = "  Child2", [columns[1]] = 1 }),
-            new(new Dictionary<string, object?> { [columns[0]] = "RootB", [columns[1]] = 1 }),
+        var columnInfos = new[] 
+        { 
+            new ColumnInfo("Object Type", ColumnType.Text), 
+            new ColumnInfo("Reference Count", ColumnType.Numeric) 
         };
+        
+        // Create hierarchical tree structure using TableRow
+        var leaf = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "Leaf", 
+            ["Reference Count"] = 1 
+        });
+        
+        var child1 = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "Child1", 
+            ["Reference Count"] = 2 
+        }, new[] { leaf });
+        
+        var child2 = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "Child2", 
+            ["Reference Count"] = 1 
+        });
+        
+        var rootA = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "RootA", 
+            ["Reference Count"] = 3 
+        }, new[] { child1, child2 });
+        
+        var rootB = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "RootB", 
+            ["Reference Count"] = 1 
+        });
+        
+        var treeNodes = new[] { rootA, rootB };
 
-        var report = new TableReport(columns, rows);
+        var report = TableReport.CreateTreeReport(columnInfos, treeNodes);
         using var sw = new StringWriter();
         Markdown.WriteTree(report, sw);
 
