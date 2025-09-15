@@ -63,77 +63,61 @@ public static class Markdown
     }
 
     /// <summary>
-    /// Write a tree-style view using box-drawing characters from a TableReport that encodes hierarchy by
-    /// leading spaces in a name column (default: "Object Type"). Optionally shows a numeric count in parentheses.
+    /// Write a tree-style view using box-drawing characters from a TableReport.
+    /// Uses TreeNodes and throws otherwise
     /// </summary>
     public static void WriteTree(TableReport report, TextWriter writer, string nameColumn = "Object Type", string? countColumn = "Reference Count")
     {
         ArgumentNullException.ThrowIfNull(report);
         ArgumentNullException.ThrowIfNull(writer);
 
-        // Build nodes with depth inferred from leading spaces (2 spaces per depth per our generator).
-        var nodes = new List<Node>();
-        foreach (var row in report.Rows)
+        // Use TreeNodes if available
+        if (report.TreeNodes.Count > 0)
         {
-            if (!row.TryGetValue(nameColumn, out var nameObj))
-                continue;
-            var nameRaw = nameObj?.ToString() ?? string.Empty;
-            int leadingSpaces = 0;
-            while (leadingSpaces < nameRaw.Length && nameRaw[leadingSpaces] == ' ') leadingSpaces++;
-            int depth = leadingSpaces / 2;
-            var label = leadingSpaces > 0 ? nameRaw.Substring(leadingSpaces) : nameRaw;
-
-            long? count = null;
-            if (!string.IsNullOrEmpty(countColumn) && row.TryGetValue(countColumn!, out var cntObj) && cntObj is not null)
-            {
-                count = Convert.ToInt64(cntObj, System.Globalization.CultureInfo.InvariantCulture);
-            }
-            nodes.Add(new Node { Depth = depth, Label = label, Count = count });
+            WriteTreeFromNodes(report.TreeNodes, writer, nameColumn, countColumn);
+            return;
         }
 
-        // Build a tree structure using a depth stack.
-        var roots = new List<Node>();
-        var stack = new Stack<Node>();
-        foreach (var n in nodes)
-        {
-            while (stack.Count > n.Depth) stack.Pop();
-            if (stack.Count == 0)
-            {
-                roots.Add(n);
-            }
-            else
-            {
-                stack.Peek().Children.Add(n);
-            }
-            stack.Push(n);
-        }
-
-        // Render recursively with box-drawing characters.
-        void Render(IReadOnlyList<Node> children, string prefix)
-        {
-            for (int i = 0; i < children.Count; i++)
-            {
-                var child = children[i];
-                bool last = i == children.Count - 1;
-                bool isRoot = prefix.Length == 0;
-                var connector = isRoot ? "├── " : (last ? "└── " : "├── ");
-                var line = prefix + connector + child.Label + (child.Count.HasValue ? $" (Count: {child.Count.Value.ToString("N0", System.Globalization.CultureInfo.InvariantCulture)})" : string.Empty);
-                writer.WriteLine(line);
-                var nextPrefix = prefix + (isRoot ? "│   " : (last ? "    " : "│   "));
-                if (child.Children.Count > 0)
-                    Render(child.Children, nextPrefix);
-            }
-        }
-
-        Render(roots, string.Empty);
+        throw new InvalidOperationException("TableReport must contain TreeNodes for tree rendering. Use CreateTreeReport() method.");
     }
 
-    private sealed class Node
+    /// <summary>
+    /// Write a tree-style report using TableRow objects to the provided TextWriter using box-drawing characters.
+    /// </summary>
+    public static void WriteTreeFromNodes(IReadOnlyList<TableRow> nodes, TextWriter writer, string nameColumn = "Object Type", string? countColumn = "Reference Count")
     {
-        public int Depth { get; set; }
-        public string Label { get; set; } = string.Empty;
-        public long? Count { get; set; }
-        public List<Node> Children { get; } = new List<Node>();
+        ArgumentNullException.ThrowIfNull(nodes);
+        ArgumentNullException.ThrowIfNull(writer);
+
+        RenderTreeNodes(nodes, writer, string.Empty, nameColumn, countColumn);
+    }
+
+    private static void RenderTreeNodes(IReadOnlyList<TableRow> children, TextWriter writer, string prefix, string nameColumn, string? countColumn)
+    {
+        for (int i = 0; i < children.Count; i++)
+        {
+            var child = children[i];
+            bool last = i == children.Count - 1;
+            bool isRoot = prefix.Length == 0;
+            var connector = isRoot ? "├── " : (last ? "└── " : "├── ");
+            
+            var label = child.TryGetValue(nameColumn, out var labelObj) ? labelObj?.ToString() ?? "" : "";
+            var valueStr = "";
+            if (countColumn != null && child.TryGetValue(countColumn, out var countObj))
+            {
+                valueStr = $" (Count: {FormatValue(countObj)})";
+            }
+            
+            var line = prefix + connector + label + valueStr;
+            
+            writer.WriteLine(line);
+            
+            if (child.Children.Count > 0)
+            {
+                var childPrefix = prefix + (isRoot ? "│   " : (last ? "    " : "│   "));
+                RenderTreeNodes(child.Children, writer, childPrefix, nameColumn, countColumn);
+            }
+        }
     }
 
     private static string FormatValue(object? value)

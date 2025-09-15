@@ -46,6 +46,12 @@ public sealed class TableReport
     /// <summary>Ordered list of rows in the table.</summary>
     public IReadOnlyList<TableRow> Rows { get; }
 
+    /// <summary>Optional tree structure for hierarchical data rendering.</summary>
+    public IReadOnlyList<TableRow> TreeNodes { get; }
+
+    /// <summary>True if this report represents hierarchical tree data.</summary>
+    public bool IsTreeReport { get; }
+
     public TableReport(IReadOnlyList<string> columns, IReadOnlyList<TableRow> rows)
         : this(columns.Select(c => new ColumnInfo(c, ColumnType.Text)).ToList(), rows)
     {
@@ -56,6 +62,22 @@ public sealed class TableReport
         ColumnInfos = columnInfos ?? throw new ArgumentNullException(nameof(columnInfos));
         Columns = columnInfos.Select(c => c.Name).ToList();
         Rows = rows ?? throw new ArgumentNullException(nameof(rows));
+        TreeNodes = Array.Empty<TableRow>();
+        IsTreeReport = false;
+    }
+
+    public static TableReport CreateTreeReport(IReadOnlyList<ColumnInfo> columnInfos, IReadOnlyList<TableRow> treeNodes)
+    {
+        return new TableReport(columnInfos, treeNodes, isTreeReport: true);
+    }
+
+    private TableReport(IReadOnlyList<ColumnInfo> columnInfos, IReadOnlyList<TableRow> treeNodes, bool isTreeReport)
+    {
+        ColumnInfos = columnInfos ?? throw new ArgumentNullException(nameof(columnInfos));
+        Columns = columnInfos.Select(c => c.Name).ToList();
+        Rows = Array.Empty<TableRow>();
+        TreeNodes = treeNodes ?? throw new ArgumentNullException(nameof(treeNodes));
+        IsTreeReport = isTreeReport;
     }
 
     public override string ToString()
@@ -80,16 +102,26 @@ public sealed class TableReport
 
 /// <summary>
 /// A single row within a <see cref="TableReport"/>, exposing values by column name.
+/// Can also represent a tree node with hierarchical children.
 /// </summary>
 public sealed class TableRow : IReadOnlyDictionary<string, object?>
 {
     private readonly IReadOnlyDictionary<string, object?> _values;
 
+    /// <summary>Child nodes under this row (for hierarchical data).</summary>
+    public IReadOnlyList<TableRow> Children { get; }
+
     public TableRow(IDictionary<string, object?> values)
+        : this(values, null)
+    {
+    }
+
+    public TableRow(IDictionary<string, object?> values, IReadOnlyList<TableRow>? children)
     {
         if (values is null) throw new ArgumentNullException(nameof(values));
         // Store as a case-sensitive map; callers should use the exact column names from the report header.
         _values = new Dictionary<string, object?>(values, StringComparer.Ordinal);
+        Children = children ?? Array.Empty<TableRow>();
     }
 
     public object? this[string key] => _values[key];
