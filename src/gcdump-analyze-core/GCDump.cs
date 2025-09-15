@@ -316,23 +316,28 @@ public sealed class GCDump : IDisposable
             new ColumnInfo("Reference Count", ColumnType.Numeric) 
         };
         
-        var treeNodes = new List<TreeNode>();
+        var treeNodes = new List<TableRow>();
         if (hotSegments.Count > 0)
         {
             // Build chain from bottom up
-            TreeNode? leaf = null;
+            TableRow? leaf = null;
             for (int i = hotSegments.Count - 1; i >= 0; i--)
             {
                 var segment = hotSegments[i];
-                var children = leaf != null ? new[] { leaf } : Array.Empty<TreeNode>();
-                leaf = new TreeNode(segment.Type, segment.Count, children);
+                var values = new Dictionary<string, object?>
+                {
+                    ["Object Type"] = segment.Type,
+                    ["Reference Count"] = segment.Count
+                };
+                var children = leaf != null ? new[] { leaf } : Array.Empty<TableRow>();
+                leaf = new TableRow(values, children);
             }
             
             if (leaf != null)
                 treeNodes.Add(leaf);
         }
 
-        return new TableReport(columnInfos, (IReadOnlyList<TreeNode>)treeNodes);
+        return TableReport.CreateTreeReport(columnInfos, treeNodes);
     }
 
     private static int[] BuildPostOrderIndex(MemoryGraph graph)

@@ -74,25 +74,25 @@ public static class Markdown
         // Use TreeNodes if available
         if (report.TreeNodes.Count > 0)
         {
-            WriteTreeFromNodes(report.TreeNodes, writer);
+            WriteTreeFromNodes(report.TreeNodes, writer, nameColumn, countColumn);
             return;
         }
 
-        throw new InvalidOperationException("TableReport must contain TreeNodes for tree rendering. Use the TreeNode-based constructor.");
+        throw new InvalidOperationException("TableReport must contain TreeNodes for tree rendering. Use CreateTreeReport() method.");
     }
 
     /// <summary>
-    /// Write a tree-style report using TreeNode objects to the provided TextWriter using box-drawing characters.
+    /// Write a tree-style report using TableRow objects to the provided TextWriter using box-drawing characters.
     /// </summary>
-    public static void WriteTreeFromNodes(IReadOnlyList<TreeNode> nodes, TextWriter writer)
+    public static void WriteTreeFromNodes(IReadOnlyList<TableRow> nodes, TextWriter writer, string nameColumn = "Object Type", string? countColumn = "Reference Count")
     {
         ArgumentNullException.ThrowIfNull(nodes);
         ArgumentNullException.ThrowIfNull(writer);
 
-        RenderTreeNodes(nodes, writer, string.Empty);
+        RenderTreeNodes(nodes, writer, string.Empty, nameColumn, countColumn);
     }
 
-    private static void RenderTreeNodes(IReadOnlyList<TreeNode> children, TextWriter writer, string prefix)
+    private static void RenderTreeNodes(IReadOnlyList<TableRow> children, TextWriter writer, string prefix, string nameColumn, string? countColumn)
     {
         for (int i = 0; i < children.Count; i++)
         {
@@ -100,15 +100,22 @@ public static class Markdown
             bool last = i == children.Count - 1;
             bool isRoot = prefix.Length == 0;
             var connector = isRoot ? "├── " : (last ? "└── " : "├── ");
-            var valueStr = child.Value != null ? $" (Count: {FormatValue(child.Value)})" : string.Empty;
-            var line = prefix + connector + child.Label + valueStr;
+            
+            var label = child.TryGetValue(nameColumn, out var labelObj) ? labelObj?.ToString() ?? "" : "";
+            var valueStr = "";
+            if (countColumn != null && child.TryGetValue(countColumn, out var countObj))
+            {
+                valueStr = $" (Count: {FormatValue(countObj)})";
+            }
+            
+            var line = prefix + connector + label + valueStr;
             
             writer.WriteLine(line);
             
             if (child.Children.Count > 0)
             {
                 var childPrefix = prefix + (isRoot ? "│   " : (last ? "    " : "│   "));
-                RenderTreeNodes(child.Children, writer, childPrefix);
+                RenderTreeNodes(child.Children, writer, childPrefix, nameColumn, countColumn);
             }
         }
     }

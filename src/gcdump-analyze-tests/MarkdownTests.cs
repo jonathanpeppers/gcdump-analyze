@@ -42,16 +42,40 @@ public class MarkdownTests : BaseTest
             new ColumnInfo("Reference Count", ColumnType.Numeric) 
         };
         
-        // Create hierarchical tree structure
-        var leaf = new TreeNode("Leaf", 1);
-        var child1 = new TreeNode("Child1", 2, new[] { leaf });
-        var child2 = new TreeNode("Child2", 1);
-        var rootA = new TreeNode("RootA", 3, new[] { child1, child2 });
-        var rootB = new TreeNode("RootB", 1);
+        // Create hierarchical tree structure using TableRow
+        var leaf = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "Leaf", 
+            ["Reference Count"] = 1 
+        });
+        
+        var child1 = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "Child1", 
+            ["Reference Count"] = 2 
+        }, new[] { leaf });
+        
+        var child2 = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "Child2", 
+            ["Reference Count"] = 1 
+        });
+        
+        var rootA = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "RootA", 
+            ["Reference Count"] = 3 
+        }, new[] { child1, child2 });
+        
+        var rootB = new TableRow(new Dictionary<string, object?> 
+        { 
+            ["Object Type"] = "RootB", 
+            ["Reference Count"] = 1 
+        });
         
         var treeNodes = new[] { rootA, rootB };
 
-        var report = new TableReport(columnInfos, treeNodes);
+        var report = TableReport.CreateTreeReport(columnInfos, treeNodes);
         using var sw = new StringWriter();
         Markdown.WriteTree(report, sw);
 
