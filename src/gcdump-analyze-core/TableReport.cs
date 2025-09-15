@@ -32,6 +32,28 @@ public sealed class ColumnInfo
 }
 
 /// <summary>
+/// Represents a hierarchical tree node for tree-structured data.
+/// </summary>
+public sealed class TreeNode
+{
+    /// <summary>The display label for this node.</summary>
+    public string Label { get; }
+
+    /// <summary>Optional numeric value associated with this node.</summary>
+    public object? Value { get; }
+
+    /// <summary>Child nodes under this node.</summary>
+    public IReadOnlyList<TreeNode> Children { get; }
+
+    public TreeNode(string label, object? value = null, IReadOnlyList<TreeNode>? children = null)
+    {
+        Label = label ?? throw new ArgumentNullException(nameof(label));
+        Value = value;
+        Children = children ?? Array.Empty<TreeNode>();
+    }
+}
+
+/// <summary>
 /// Represents a tabular report with named string columns and rows addressable by column name.
 /// Values are objects and should provide meaningful ToString() for rendering.
 /// </summary>
@@ -46,6 +68,9 @@ public sealed class TableReport
     /// <summary>Ordered list of rows in the table.</summary>
     public IReadOnlyList<TableRow> Rows { get; }
 
+    /// <summary>Optional tree structure for hierarchical data rendering.</summary>
+    public IReadOnlyList<TreeNode> TreeNodes { get; }
+
     public TableReport(IReadOnlyList<string> columns, IReadOnlyList<TableRow> rows)
         : this(columns.Select(c => new ColumnInfo(c, ColumnType.Text)).ToList(), rows)
     {
@@ -56,6 +81,15 @@ public sealed class TableReport
         ColumnInfos = columnInfos ?? throw new ArgumentNullException(nameof(columnInfos));
         Columns = columnInfos.Select(c => c.Name).ToList();
         Rows = rows ?? throw new ArgumentNullException(nameof(rows));
+        TreeNodes = Array.Empty<TreeNode>();
+    }
+
+    public TableReport(IReadOnlyList<ColumnInfo> columnInfos, IReadOnlyList<TreeNode> treeNodes)
+    {
+        ColumnInfos = columnInfos ?? throw new ArgumentNullException(nameof(columnInfos));
+        Columns = columnInfos.Select(c => c.Name).ToList();
+        Rows = Array.Empty<TableRow>();
+        TreeNodes = treeNodes ?? throw new ArgumentNullException(nameof(treeNodes));
     }
 
     public override string ToString()

@@ -36,17 +36,22 @@ public class MarkdownTests : BaseTest
     [Fact]
     public async Task Markdown_WriteTree_Snapshot()
     {
-        var columns = new[] { "Object Type", "Reference Count" };
-        var rows = new List<TableRow>
-        {
-            new(new Dictionary<string, object?> { [columns[0]] = "RootA", [columns[1]] = 3 }),
-            new(new Dictionary<string, object?> { [columns[0]] = "  Child1", [columns[1]] = 2 }),
-            new(new Dictionary<string, object?> { [columns[0]] = "    Leaf", [columns[1]] = 1 }),
-            new(new Dictionary<string, object?> { [columns[0]] = "  Child2", [columns[1]] = 1 }),
-            new(new Dictionary<string, object?> { [columns[0]] = "RootB", [columns[1]] = 1 }),
+        var columnInfos = new[] 
+        { 
+            new ColumnInfo("Object Type", ColumnType.Text), 
+            new ColumnInfo("Reference Count", ColumnType.Numeric) 
         };
+        
+        // Create hierarchical tree structure
+        var leaf = new TreeNode("Leaf", 1);
+        var child1 = new TreeNode("Child1", 2, new[] { leaf });
+        var child2 = new TreeNode("Child2", 1);
+        var rootA = new TreeNode("RootA", 3, new[] { child1, child2 });
+        var rootB = new TreeNode("RootB", 1);
+        
+        var treeNodes = new[] { rootA, rootB };
 
-        var report = new TableReport(columns, rows);
+        var report = new TableReport(columnInfos, treeNodes);
         using var sw = new StringWriter();
         Markdown.WriteTree(report, sw);
 

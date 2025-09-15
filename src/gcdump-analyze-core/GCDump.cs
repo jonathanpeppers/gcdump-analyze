@@ -309,25 +309,30 @@ public sealed class GCDump : IDisposable
                 break;
         }
 
-        // Render as a simple two-column table: indented type name + counts per segment.
+        // Build tree structure from hot segments (chain from root to leaf)
         var columnInfos = new ColumnInfo[] 
         { 
             new ColumnInfo("Object Type", ColumnType.Text), 
             new ColumnInfo("Reference Count", ColumnType.Numeric) 
         };
-        var rows = new List<TableRow>(hotSegments.Count);
-        for (int d = 0; d < hotSegments.Count; d++)
+        
+        var treeNodes = new List<TreeNode>();
+        if (hotSegments.Count > 0)
         {
-            var display = hotSegments[d].Type;
-            var name = d == 0 ? display : new string(' ', d * 2) + display;
-            rows.Add(new TableRow(new Dictionary<string, object?>
+            // Build chain from bottom up
+            TreeNode? leaf = null;
+            for (int i = hotSegments.Count - 1; i >= 0; i--)
             {
-                [columnInfos[0].Name] = name,
-                [columnInfos[1].Name] = hotSegments[d].Count,
-            }));
+                var segment = hotSegments[i];
+                var children = leaf != null ? new[] { leaf } : Array.Empty<TreeNode>();
+                leaf = new TreeNode(segment.Type, segment.Count, children);
+            }
+            
+            if (leaf != null)
+                treeNodes.Add(leaf);
         }
 
-        return new TableReport(columnInfos, rows);
+        return new TableReport(columnInfos, (IReadOnlyList<TreeNode>)treeNodes);
     }
 
     private static int[] BuildPostOrderIndex(MemoryGraph graph)

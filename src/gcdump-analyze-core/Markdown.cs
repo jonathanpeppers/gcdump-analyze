@@ -71,6 +71,13 @@ public static class Markdown
         ArgumentNullException.ThrowIfNull(report);
         ArgumentNullException.ThrowIfNull(writer);
 
+        // Use TreeNodes if available, otherwise fall back to parsing row data
+        if (report.TreeNodes.Count > 0)
+        {
+            WriteTreeFromNodes(report.TreeNodes, writer);
+            return;
+        }
+
         // Build nodes with depth inferred from leading spaces (2 spaces per depth per our generator).
         var nodes = new List<Node>();
         foreach (var row in report.Rows)
@@ -126,6 +133,38 @@ public static class Markdown
         }
 
         Render(roots, string.Empty);
+    }
+
+    /// <summary>
+    /// Write a tree-style report using TreeNode objects to the provided TextWriter using box-drawing characters.
+    /// </summary>
+    public static void WriteTreeFromNodes(IReadOnlyList<TreeNode> nodes, TextWriter writer)
+    {
+        ArgumentNullException.ThrowIfNull(nodes);
+        ArgumentNullException.ThrowIfNull(writer);
+
+        RenderTreeNodes(nodes, writer, string.Empty);
+    }
+
+    private static void RenderTreeNodes(IReadOnlyList<TreeNode> children, TextWriter writer, string prefix)
+    {
+        for (int i = 0; i < children.Count; i++)
+        {
+            var child = children[i];
+            bool last = i == children.Count - 1;
+            bool isRoot = prefix.Length == 0;
+            var connector = isRoot ? "├── " : (last ? "└── " : "├── ");
+            var valueStr = child.Value != null ? $" (Count: {FormatValue(child.Value)})" : string.Empty;
+            var line = prefix + connector + child.Label + valueStr;
+            
+            writer.WriteLine(line);
+            
+            if (child.Children.Count > 0)
+            {
+                var childPrefix = prefix + (isRoot ? "│   " : (last ? "    " : "│   "));
+                RenderTreeNodes(child.Children, writer, childPrefix);
+            }
+        }
     }
 
     private sealed class Node
