@@ -16,19 +16,13 @@ public enum ColumnType
 /// <summary>
 /// Represents column metadata including name and type.
 /// </summary>
-public sealed class ColumnInfo
+public sealed class ColumnInfo(string name, ColumnType type)
 {
     /// <summary>The display name of the column.</summary>
-    public string Name { get; }
+    public string Name { get; } = name ?? throw new ArgumentNullException(nameof(name));
 
     /// <summary>The type of the column for formatting purposes.</summary>
-    public ColumnType Type { get; }
-
-    public ColumnInfo(string name, ColumnType type)
-    {
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        Type = type;
-    }
+    public ColumnType Type { get; } = type;
 }
 
 /// <summary>
